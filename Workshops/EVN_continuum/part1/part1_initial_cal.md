@@ -346,3 +346,173 @@ plotms()
   * You can see 8 spw; the edges of this have low amplitudes due to poor sensitivity and there are some data all at zero.
   * Zoom in (using <img src="files/zoom_plotms.png" width="20">) and use select to highlight bad data (<img src="files/select_plotms.png" width="20">) and use locate (<img src="files/locate_plotms.png" width="20">) to see what antenna it is associated with.
   * You should find that this is mostly SV (dark green in this plot).
+
+* **Important:** Before more flagging, remember to back up the current flags. Do this any time you think you might need to change your mind about flagging; use a different version name each time and make a note of it (CASA task `flagdata` can make an automatic backup but it will not have a memorable name). The backups for this data set are stored in `n14c3.ms.flagversions`.We will now back up the flags for this data set now:
+
+```python
+  # In CASA
+  default(flagmanager)
+  vis='n14c3.ms'
+  mode='save'
+  versionname='preSVandEndChans'
+
+  flagmanager()
+```
+
+  * After identifying the bad data using `plotms` we can flag antenna SV (only one polarisation is bad but CASA can't yet calibrate a single polarisation so we need to remove the whole antenna).
+
+```
+  # In CASA
+  default(flagdata)
+  vis='n14c3.ms'
+  mode='manual'
+  antenna='SV'
+```
+
+* Now we should re-inspect the data for any more corrupted data. Plot the most sensitive baseline to see the end channels more clearly and note which are below about half the maximum amplitude.
+
+```python
+# In CASA
+default(plotms)
+vis='n14c3.ms'
+xaxis='channel'
+yaxis='amp'
+field='1848+283'        # The phase-cal/bandpass cal
+avgtime='3600'          # Will only average within scans unless additionally told to average scans too
+antenna='EF&JB'          # Plot all baselines to the largest and most sensitive antenna
+correlation='RR,LL'     # Only plot the parallel hands; the cross hands are fainter (and we won't be using them).
+iteraxis='spw'
+
+plotms()
+```
+
+* Use the arrows at the bottom of `plotms` to scroll through the spw. Odd and even spw behave differently but there is no need to spend too much time on this as the suggested channels to flag are given here for time saving purposes:
+
+```
+# In CASA
+default(flagdata)
+vis='n14c3.ms'
+mode='manual'
+spw='0:0~5;29~31,2:0~5;29~31,4:0~5;29~31,6:0~5;29~31,1:0~2;27~31,3:0~2;27~31,5:0~2;27~31,7:0~2;27~31')
+
+flagdata()
+```
+
+* Reinspect again and plot amp v. time, now averaging in frequency not time:
+
+```python
+# In CASA
+default(plotms)
+vis='n14c3.ms'
+xaxis='time'
+yaxis='amp'
+field='1848+283'        
+spw='0~7:13~20'        # Average a few central channels where the response is stable
+avgchannel='8'  
+antenna='EF&*'          
+correlation='RR,LL'     
+coloraxis='baseline'
+
+plotms()
+```
+
+![](files/CASA_Basic_EVN_3.png "flag_time_plotms")
+
+* Note that the first one or two integrations of each scan are bad. There is a specific `flagdata` mode for this called `quack`. We will safely assume that all sources are affected.
+
+```python
+# In CASA
+default(flagdata)
+vis='n14c3.ms'
+mode='quack'
+quackinterval = 5     # 5 seconds, or just over 2 intgrations
+
+flagdata()
+```
+
+* Now go through each baseline to identify remaining bad data (enter `iteration='baseline'` and re-load `plotms`). Again, this has already been listed so don't spend too long, just make sure you have some idea of how to identify and record bad data. There is more than one bad scan on HH and as we are plotting the phase-cal it is likely that the target in-between was affected. Plot this.
+
+```
+# In CASA
+default(plotms)
+
+vis='n14c3.ms'
+xaxis='time'
+yaxis='amp'
+scan='60~70'            # a few scans including the bad data; plot all fields in this time range
+spw='0~7:13~20'       
+avgchannel='8'  
+antenna='EF&HH'         # just the relevant baseline          
+correlation='RR,LL'     
+coloraxis='field'       # distinguish sources
+
+plotms()
+```
+
+![](files/CASA_Basic_EVN_4.png "flag_time_plotms_zoom")
+
+* Flag the scans when the target (in brown in the plot here) goes right to zero.
+
+```python
+# In CASA
+default(flagdata)
+vis='n14c3.ms'
+antenna='HH'
+mode='manual'
+scan='62~65'
+
+flagdata()
+```
+
+* Inspect the next most distant antenna, SH
+
+```python
+# In CASA
+default(plotms)
+
+vis='n14c3.ms'
+xaxis='time'
+yaxis='amp'
+field='1848+283'
+spw='0~7:13~20'       
+avgchannel='8'  
+antenna='EF&SH'         # just the relevant baseline          
+correlation='RR,LL'     
+coloraxis='spw'         # distinguish spw
+
+plotms()
+```
+
+![](files/CASA_Basic_EVN_5.png "flag_time_plotms_zoom")
+
+There are many short, bad periods, some only affecting certain spw. The easiest way to cope with this is to write a flag list. Identify antennas/spw/times, adding 1s to the start and finish of each flagging period. They are all shorter than one scan so the same flags aren't applied to the target but later, we will look for similar bad data on the target. Take a look at the flag list file: `flagSH.flagcmd` which is in your current directory and cross-check that these entered values are affected.
+
+If you are happy, then we use this file to automatically flag those channels specified in the file:
+
+```python
+# In CASA
+default(flagdata)
+vis='n14c3.ms'
+mode='list'
+inpfile='flagSH.flagcmd'
+
+flagdata()
+```
+
+* Reinspect to check that the bad data are all gone:
+
+```python
+# In CASA
+default(plotms)
+vis='n14c3.ms'
+xaxis='time'
+yaxis='amp'
+field='1848+283'
+spw='0~7:13~20'
+avgchannel='8'
+antenna='EF&*'
+coloraxis='corr'
+correlation='RR,LL'
+
+plotms()
+```
