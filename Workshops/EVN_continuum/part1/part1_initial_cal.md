@@ -19,10 +19,10 @@ It is suitable for good-quality EVN data which does not require the use of 'rate
 4. [Frequency-related calibration](#frequency_related_calibration)
   * [Delay calibration](#Delay_calib)
   * [Pre-bandpass time-dependent phase correction](#pre_bandpass_phase)
-  * Bandpass correction
-5. Apply calibration and split out phase-ref - target pairs
-  * Apply the initial calibration
-  * Split out each pair of sources
+  * [Bandpass correction](#bandpass)
+5. [Apply calibration and split out phase-ref - target pairs](#apply_cal)
+  * [Apply the initial calibration](#apply_init_cal)
+  * [Split out each pair of sources](#split)
 
 ### 1. <a name="Data_and_supporting_material">Data and supporting material</a>
 [<< back to top](#top)
@@ -684,6 +684,7 @@ plotcal()
 For each spw, in a different color, the corrections have a systematic shape. These solutions are also smooth in time which means (normally) that these are ok!
 
 ### <a name="bandpass">c. Bandpass correction</a>
+[<< back to top](#top)
 
 We use the bandpass calibration source 1848+283 to derive channel-by-channel corrections for phase and amplitude. We apply the phase vs. time calibration table ()`n14c3_bpcal.p0`) to allow the data to be averaged in time, and we apply the delay and Tsys/gain curve correction tables to provide preliminary per-spw corrections to the slope of the phase and the overall amplitude fluctuations with time.
 
@@ -738,6 +739,7 @@ The phase corrections are mostly small, larger close to the remaining end channe
 
 ### <a name="apply_cal">Apply calibration and split out phase-ref - target pairs </a>
 #### <a name="apply_init_cal">Apply the initial calibration </a>
+[<< back to top](#top)
 
 The frequency-dependent calibration i.e. delay, Tsys/gain curve and bandpass, is stable in time over the few hours of these observations and we apply these table to all sources.
 
@@ -787,10 +789,17 @@ coloraxis='field'
 yaxis='amp'
 plotms()
 ```
+
+![](files/CASA_Basic_EVN_15.png "final_cal1")
+![](files/CASA_Basic_EVN_16.png "final_cal2")
+![](files/CASA_Basic_EVN_17.png "final_cal3")
+![](files/CASA_Basic_EVN_18.png "final_cal4")
+
 Amplitude and phase are reasonably flat as a function of frequency but different for different antennas and the phase still has a big variation with time, along with some amplitude discrepancies.
 
 
 #### <a name="split">Split out each pair of sources </a>
+[<< back to top](#top)
 
 For convenience, split out each phase-reference - target pair separately. The 'corrected' column will just be 'data' in the newMSs.
 
