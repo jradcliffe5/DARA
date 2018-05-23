@@ -13,8 +13,8 @@ This website consolidates teaching materials used in data processing schools. Fo
   - [2017](Kenya_lectures/2017.md)
 * Zambia
   - [2017](Zambia_lectures/2017.md)
-  
-  
+
+
 ## Workshops
 
 * [EVN Continuum](Workshops/EVN_continuum/overview_page.md)
@@ -29,4 +29,3 @@ Anita Richards - a.m.s.richards@manchester.ac.uk
 Hayden Rampadarath - hayden.rampadarath@manchester.ac.uk
 Luke Hindson - l.hindson3@herts.ac.uk
 Jack Radcliffe - jack.radcliffe@manchester.ac.uk / J.F.Radcliffe@astro.rug.nl
-
