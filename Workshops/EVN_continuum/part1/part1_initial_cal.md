@@ -18,7 +18,7 @@ It is suitable for good-quality EVN data which does not require the use of 'rate
   * [Inspect and flag data](#Flag_auto_inspect)
 4. [Frequency-related calibration](#frequency_related_calibration)
   * [Delay calibration](#Delay_calib)
-  * Pre-bandpass time-dependent phase correction
+  * [Pre-bandpass time-dependent phase correction](#pre_bandpass_phase)
   * Bandpass correction
 5. Apply calibration and split out phase-ref - target pairs
 6. Apply the initial calibration
@@ -600,4 +600,33 @@ subplot=431
 plotcal()
 ```
 
-![](files/CASA_Basic_EVN_8.png "delay_plotms_")
+![](files/CASA_Basic_EVN_9.png "delay_caltable")
+
+The solutions are smooth in frequency and don't have massive values (30ns is ok for EVN observations). Note that the delay solutions are proportional to the baseline length (see the plotants image for reference)
+
+### <a name="pre_bandpass_phase">b. Pre-bandpass time-dependent phase correction
+[<< back to top](#top)
+
+We need now need to correct channel-by-channel errors but in order to get high enough signal to noise, we need to average the data in time. However, in order to do that, we need to average in time. The delay corrections just derived are good enough to allow preliminary channel averaging to derive time-dependent solutions before doing this.
+
+* Lets first look at phases versus time using `plotms` again:
+
+
+```python
+# In CASA
+default(plotms)
+vis='n14c3.ms'
+xaxis='time'
+yaxis='phase'
+field='1848+283'
+spw='0~7:13~20'
+avgchannel='8'
+antenna='EF&*'
+coloraxis='spw'
+iteraxis='baseline'
+correlation='RR'
+
+plotms()
+```
+
+![](files/CASA_Basic_EVN_10.png "phase_time_plotms_zoom")
