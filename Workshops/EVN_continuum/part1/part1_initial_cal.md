@@ -344,5 +344,5 @@ plotms()
 
   * You can change the plot interactively in plotms.
   * You can see 8 spw; the edges of this have low amplitudes due to poor sensitivity and there are some data all at zero.
-  * Zoom in (using ![](files/zoom_plotms.png "plotms_zoom" =20x20)) and use select to highlight bad data (![](files/select_plotms.png =20x20)) and use locate (![](files/locate_plotms.png =20x20)) to see what antenna it is associated with
+  * Zoom in (using <img src="files/zoom_plotms.png" width="48">) and use select to highlight bad data (<img src="files/select_plotms.png" width="48">) and use locate (<img src="files/locate_plotms.png" width="48">) to see what antenna it is associated with
   * You should find that this is mostly SV (dark green in this plot).
