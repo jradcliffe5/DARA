@@ -1,37 +1,32 @@
-## Welcome to GitHub Pages
+# Welcome to the Development in Africa with Radio Astronomy (DARA) Unit 4 Repository
 
-You can use the [editor on GitHub](https://github.com/jradcliffe5/DARA/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
+This page is designed to be a replacement for the old Unit 4 website ([see here](http://www.jb.man.ac.uk/~radcliff/DARA/index.html)) so that we can easily flag issues with materials taught in this unit
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## Information on DARA
+Manchester is playing a leading role in the future long-term development of the SKA by training the next generation of African students who will run telescopes of the SKA2 in 8 countries. The DARA (Development in Africa with Radio Astronomy) initiative is within the UK Newton project and is coordinated with South Africa. DARA is headed by Professor Melvin Hoare (Leeds), Professor Peter Wilkinson, Dr. Robert Beswick (Manchester), Professor Michael Jones, Professor Matthew Jarvis (Oxford), Professor Martin Hardcastle, Dr. Mark Thompson (Hertfordshire) together with Dr. Roelf Botha (HartRAO; South Africa). Other members of JBCA are now taking leading roles in the training and have recently returned from their first training sessions in Kenya and Zambia.
+This website consolidates teaching materials used in data processing schools. For an overview of DARA as a whole please see the main DARA [website](https://www.dara-project.org)
 
-### Markdown
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## Lectures
 
-```markdown
-Syntax highlighted code block
+* Kenya
+  - [2017](Kenya_lectures/2017.md)
+* Zambia
+  - [2017](Zambia_lectures/2017.md)
+  
+  
+## Workshops
 
-# Header 1
-## Header 2
-### Header 3
+* [EVN Continuum](Workshops/EVN_continuum/overview_page.md)
+* [Spectral Line NGC660](Workshops/Spectral_line/overview_page.md)
+* [3C277.1 e-MERLIN Continuum](Workshops/eMERLIN_cont/overview_page.md)
+* [Fringe Fitting with AIPS](Workshops/fringe_fitting/overview_page.md)
 
-- Bulleted
-- List
+## Contact
 
-1. Numbered
-2. List
+If you have any problems with the materials presented here please don't hesitate to contact any of us. For enquiries specific to the Kenyan school please contact Anita Richards or Hayden Rampadarath. For enquiries specific to the Zambian school, please contact Jack Radcliffe of Luke Hindson. If there are problems specifically about the website (e.g. broken links) please contact Jack Radcliffe:
+Anita Richards - a.m.s.richards@manchester.ac.uk
+Hayden Rampadarath - hayden.rampadarath@manchester.ac.uk
+Luke Hindson - l.hindson3@herts.ac.uk
+Jack Radcliffe - jack.radcliffe@manchester.ac.uk / J.F.Radcliffe@astro.rug.nl
 
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/jradcliffe5/DARA/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
