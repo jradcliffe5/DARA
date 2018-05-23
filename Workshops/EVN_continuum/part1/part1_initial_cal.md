@@ -731,7 +731,8 @@ yaxis='amp'
 plotcal()
 ```
 
-![](files/CASA_Basic_EVN_12.png "phase_time_plotms_zoom")
+![](files/CASA_Basic_EVN_13.png "bandpass_caltable1")
+![](files/CASA_Basic_EVN_14.png "bandpass_caltable2")
 
 The phase corrections are mostly small, larger close to the remaining end channels, and the amplitude corrections are close to one.
 
@@ -787,3 +788,50 @@ yaxis='amp'
 plotms()
 ```
 Amplitude and phase are reasonably flat as a function of frequency but different for different antennas and the phase still has a big variation with time, along with some amplitude discrepancies.
+
+
+#### <a name="split">Split out each pair of sources </a>
+
+For convenience, split out each phase-reference - target pair separately. The 'corrected' column will just be 'data' in the newMSs.
+
+We use the task `split` to do this:
+
+```python
+# In CASA
+os.system('rm -rf J1640+3946_3C345.ms')
+os.system('rm -rf J1640+3946_3C345.ms.flagversions')
+
+default(split)
+vis='n14c3.ms'
+outputvis='J1640+3946_3C345.ms'
+field='J1640+3946,3C345'
+datacolumn='corrected'
+
+split()
+
+os.system('rm -rf 1848+283_J1849+3024.ms')
+os.system('rm -rf 1848+283_J1849+3024.ms.flagversions')
+outputvis='1848+283_J1849+3024.ms'
+field='1848+283,J1849+3024'
+datacolumn='corrected'
+
+split()
+```
+
+Ignore any 'file left unfinished' messages if the lists are OK)
+
+* List each of these
+
+```python
+os.system('rm -rf J1640+3946_3C345.ms.listobs')
+default(listobs)
+vis='J1640+3946_3C345.ms'
+listfile='J1640+3946_3C345.ms.listobs'
+listobs()
+
+os.system('rm -rf 1848+283_J1849+3024.ms.listobs')
+vis='1848+283_J1849+3024.ms'
+listfile='1848+283_J1849+3024.ms.listobs'
+listobs()
+```
+Check the `listobs` files and go on to the next part CASA_1848+283_J1849+3024. Congratulations this is the end of part 1. This is a scripted example of phase-referencing, imaging and self-calibration.
