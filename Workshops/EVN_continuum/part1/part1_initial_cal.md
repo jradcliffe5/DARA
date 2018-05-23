@@ -81,7 +81,7 @@ This web page presents inputs for CASA tasks to be entered interactively at a te
 1. Make a directory called something you will remember, e.g. EVN, and work in it. (Do not do data reduction within the CASA installation).
 2. Copy the data and files you need to this directory. <path***> is the original location of these files; **Note** in general, *** means something for you to fill in. e.g:
 
-```
+```bash
 mdir EVN
 cd EVN
 cp <path***>/n14c3_1_1.IDI? .
@@ -95,7 +95,7 @@ tar -zxvf NME_DARA.tgz          # extract the additional material (also the scri
 
 * Check that you are in the right place with all the data.
 
-```
+```bash
 pwd                   # tells you present working directory
 ls
 which should show
@@ -110,7 +110,8 @@ flagTar1Ph1.flagcmd  n14c3_1_1.IDI2  NME_3C345.py       NME_DARA.tgz
 #### <a name="#Load_data_earth_rot">a. Load data and correct for Earth rotation
 
 The first task is `importfitsidi` which converts the fits files to CASA-amicable Measurement Sets (MS). Copy these lines one at a time (when you get more familiar, some inputs can be copied together).
-```
+
+```python
 # in CASA
 os.system('rm -rf n14c3_prefix.ms*')              # make sure no old files are present
 
