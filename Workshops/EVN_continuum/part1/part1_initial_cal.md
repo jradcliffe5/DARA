@@ -15,7 +15,7 @@ It is suitable for good-quality EVN data which does not require the use of 'rate
 3. [Data loading and inspection](#Data_loading_and_inspection)
   * [Load data and correct for Earth rotation](#Load_data_earth_rot)
   * [Fix antenna and Tsys tables](#Fix_antenna_tsys)
-  * Inspect and flag data
+  * [Inspect and flag data](#Flag_auto_inspect)
 4. Frequency-related calibration
   * Delay calibration</li>
   * Pre-bandpass time-dependent phase correction</li>
@@ -267,3 +267,56 @@ plotcal()
 ```
 
 ![alt text](files/CASA_Basic_EVN.png "gencal tsys")
+
+You can see the changes with each source change.
+
+Three antennas do not have Tsys measurements but the .gc (gain curve) table provides a scaled gain-elevation correction which scales the visibility amplitudes, although without any allowance for weather or source contribution
+
+`listobs` gave the antenna diameters as zero since the information is not written into the fits files for EVN data. Some antennas have off-axis feeds and so the offsets also have to be inserted.
+
+```python
+# In CASA
+# Copy these arrays of values (no line breaks in each array)
+ants=  ['EF','WB','JB','ON','NT','TR','SV','ZC','BD','SH','HH','YS','JD']
+diams= [100.0,300.0,75.0,25.0,32.0,32.0,32.0,32.0,32.0,25.0,24.0,40.0,25.0]
+axoffs=[[0.013,4.95,0.,2.15,1.831,0.,-0.007,-0.008,-0.004,-0.002,6.692,2.005,0.]
+        ,[0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.]
+        ,[0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.]]
+
+# Modify the antenna table
+tb.open('n14c3.ms/ANTENNA', nomodify=F)
+tb.putcol('DISH_DIAMETER', diams)
+tb.putcol('OFFSET',axoffs)
+tb.close()
+
+default(listobs)     # Check in listobs
+vis='n14c3.ms'
+listobs()
+```
+
+This time we don't write a text file because the parameter `listfile` was not set, so just look in the logger to ensure that the antenna diameters now appear.
+
+#### <a name="Flag_auto_inspect">c. Inspect and flag data </a>
+
+* Lets first flag the autocorrelations for continuum data (ignore warnings about the processor).
+
+```python
+# In CASA
+default(flagdata)
+vis='n14c3.ms'
+mode='manual'
+autocorr=T
+
+flagdata()
+```
+
+* Next lets plot the location of antennas using task `plotants`.
+
+```python
+# In CASA
+default(plotants)
+vis='n14c3.ms'
+
+plotants()
+```
+![alt text](files/CASA_Basic_EVN_1.png "antpos")
