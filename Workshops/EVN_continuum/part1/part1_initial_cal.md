@@ -1,9 +1,9 @@
-## Part 1: CASA Basic EVN Calibration
+# Part 1: CASA Basic EVN Calibration
 
 ##### [<< Return to homepage](../../../index.md)
 ##### [<< Return to EVN continuum](../overview_page.md)
 
-### Guidance for calibrating EVN data using CASA
+### <a name="top">Guidance for calibrating EVN data using CASA</a>
 
 This guide uses capabilities of CASA 4.7.2; CASA 5+ does work apart from the Tsys calibration step (and the script isn't fixed yet, see Issue #1).
 
@@ -14,7 +14,7 @@ It is suitable for good-quality EVN data which does not require the use of 'rate
 2. [How to use this guide](#How_to_use_this_guide)
 3. [Data loading and inspection](#Data_loading_and_inspection)
   * [Load data and correct for Earth rotation](#Load_data_earth_rot)
-  * Fix antenna and Tsys tables
+  * [Fix antenna and Tsys tables](#Fix_antenna_tsys)
   * Inspect and flag data
 4. Frequency-related calibration
   * Delay calibration</li>
@@ -25,6 +25,7 @@ It is suitable for good-quality EVN data which does not require the use of 'rate
 7. Split out each pair of sources
 
 ### 1. <a name="Data_and_supporting_material">Data and supporting material</a>
+[<< back to top](#top)
 
 n14c3 is an EVN network monitoring experiment. It contains two target - phase-reference pairs of bright sources (plus a 5th source which we will not use). The full data reduction here needs:
 
@@ -69,6 +70,7 @@ These are the sources:
 J1849+3024 is also used as bandpass calibrator because it is a bright, compact source with good data on all baselines. If you are reducing a new data set, you would check the suitability of the bandpass calibrator during early data reduction.
 
 ### 2. <a name="How_to_use_this_guide">How to use this guide</a>
+[<< back to top](#top)
 
 This web page presents inputs for CASA tasks to be entered interactively at a terminal prompt for the calibration of the averaged data and initial target imaging. This is useful to examine your options and see how to check for syntax errors.
 
@@ -91,7 +93,8 @@ cp <path***>/*py .
 tar -zxvf NME_DARA.tgz          # extract the additional material (also the scripts  which will be supplied).
 ```
 
-### 3. <a name="#Data_loading_and_inspection">Data loading and inspection</a>
+### 3. <a name="Data_loading_and_inspection">Data loading and inspection</a>
+[<< back to top](#top)
 
 * Check that you are in the right place with all the data.
 
@@ -107,7 +110,8 @@ flagTar1Ph1.flagcmd  n14c3_1_1.IDI2  NME_3C345.py       NME_DARA.tgz
 
 * Now start CASA.
 
-#### <a name="#Load_data_earth_rot">a. Load data and correct for Earth rotation
+#### <a name="Load_data_earth_rot">a. Load data and correct for Earth rotation
+[<< back to top](#top)
 
 * The first task is `importfitsidi` which converts the fits files to CASA-amicable Measurement Sets (MS). Copy these lines one at a time (when you get more familiar, some inputs can be copied together).
 
@@ -202,7 +206,7 @@ Fields: 5
   4         2023+336            20:25:10.842114 +33.43.00.21435 J2000       542880
 ```
 
-  * Correlator set-up: there ar 8 spectral windows (AKA IFs), each of 32 channels, and 4 polarization products (we will only use the total intensity combination of RR and LL).
+  * Correlator set-up: there are 8 spectral windows (AKA IFs), each of 32 channels, and 4 polarization products (we will only use the total intensity combination of RR and LL).
 ```
 Spectral Windows:  (8 unique spectral windows and 1 unique polarization setups)
   SpwID  Name   #Chans   Frame   Ch0(MHz)  ChanWid(kHz)  TotBW(kHz) CtrFreq(MHz)  Corrs          
@@ -226,3 +230,40 @@ Antennas: 12:
   3    ON    EVN:04    0.0  m   +011.55.04.0  +57.13.05.3          0.0000        0.0000  6363057.6347  3370965.885800   711466.227900  5349664.219900
 ...
 ```
+
+
+#### <a name="Fix_antenna_tsys">b. Fix antenna and Tsys tables </a>
+
+These steps may not always be needed as CASA and EVN data formats become more compatible especially with the VLBI tools getting released with CASA v5.3+.
+
+The `antab` table has to be converted into a subtable within the MS using `tsys_spectrum.py`. This is then be used to generated a Tsys correction table using `gencal`. The system temperature is measured every few minutes. This compensates roughly for the different levels of signal from different sources, the effects of elevation and other amplitude fluctuations. Each antenna has a characteristic response in terms of Kelvin of system temperature per Jy of flux, so Tsys is also used to scale the flux density.
+
+```python
+# In CASA:
+inbase='n14c3'                   # pass base name to script
+execfile('tsys_spectrum.py')     # execfile runs any suitable script inside CASA
+
+os.system('rm -rf n14c3.tsys')
+
+default(gencal)  # This reads the Tsys information we just wrote into the MS and derives a calibration table
+vis='n14c3.ms'
+caltable='n14c3.tsys'
+caltype='tsys'
+
+gencal()
+```
+
+Plot the table generated.
+
+```python
+# In CASA:
+default(plotcal)
+caltable='n14c3.tsys'
+xaxis='freq'
+yaxis='tsys'
+subplot=431
+iteration='antenna'
+plotcal()
+```
+
+![alt text](files/CASA_Basic_EVN.png "gencal tsys")
