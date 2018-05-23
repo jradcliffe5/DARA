@@ -233,6 +233,7 @@ Antennas: 12:
 
 
 #### <a name="Fix_antenna_tsys">b. Fix antenna and Tsys tables </a>
+[<< back to top](#top)
 
 These steps may not always be needed as CASA and EVN data formats become more compatible especially with the VLBI tools getting released with CASA v5.3+.
 
@@ -297,6 +298,7 @@ listobs()
 This time we don't write a text file because the parameter `listfile` was not set, so just look in the logger to ensure that the antenna diameters now appear.
 
 #### <a name="Flag_auto_inspect">c. Inspect and flag data </a>
+[<< back to top](#top)
 
 * Lets first flag the autocorrelations for continuum data (ignore warnings about the processor).
 
@@ -310,7 +312,7 @@ autocorr=T
 flagdata()
 ```
 
-* Next lets plot the location of antennas using task `plotants`.
+* Next: lets plot the location of antennas using task `plotants`.
 
 ```python
 # In CASA
@@ -320,3 +322,27 @@ vis='n14c3.ms'
 plotants()
 ```
 ![alt text](files/CASA_Basic_EVN_1.png "antpos")
+
+* Now we shall use `plotms` to plot the visibility data. We start by looking at a bright source where it is easiest to tell good and bad data apart.
+
+```python
+# In CASA
+default(plotms)
+vis='n14c3.ms'
+xaxis='frequency'
+yaxis='amp'
+field='1848+283'        # The phase-cal/bandpass cal
+avgtime='3600'          # Will only average within scans unless additionally told to average scans too
+antenna='EF&*'          # Plot all baselines to the largest and most sensitive antenna
+correlation='RR,LL'     # Only plot the parallel hands; the cross hands are fainter (and we won't be using them).
+coloraxis='antenna2'
+
+plotms()
+```
+
+![alt text](files/CASA_Basic_EVN_2.png "flag_plotms")
+
+  * You can change the plot interactively in plotms.
+  * You can see 8 spw; the edges of this have low amplitudes due to poor sensitivity and there are some data all at zero.
+  * Zoom in (using ![](files/zoom_plotms.png "plotms_zoom")) and use select to highlight bad data (![](files/select_plotms.png)) and use locate (![](files/locate_plotms.png)) to see what antenna it is associated with
+  * You should find that this is mostly SV (dark green in this plot).
