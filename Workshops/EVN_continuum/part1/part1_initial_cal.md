@@ -21,8 +21,8 @@ It is suitable for good-quality EVN data which does not require the use of 'rate
   * [Pre-bandpass time-dependent phase correction](#pre_bandpass_phase)
   * Bandpass correction
 5. Apply calibration and split out phase-ref - target pairs
-6. Apply the initial calibration
-7. Split out each pair of sources
+  * Apply the initial calibration
+  * Split out each pair of sources
 
 ### 1. <a name="Data_and_supporting_material">Data and supporting material</a>
 [<< back to top](#top)
@@ -630,3 +630,160 @@ plotms()
 ```
 
 ![](files/CASA_Basic_EVN_10.png "phase_time_plotms_zoom")
+
+And zooming into a single scan reveals:
+
+![](files/CASA_Basic_EVN_11.png "phase_time_plotms_zoom")
+
+Some notes on these plots:
+  * In these plots, each spw is a different colour and  only one polarization is shown
+  * The phase for a point source at the phase centre should be flat but here you see wiggles of a few tens degrees in a minute.
+  * We therefore need to choose a solution interval in which any systematic slope is greater than the scatter from noise.
+  * From these plots, a 30sec solution interval (i.e. time averaging) seems about right. We need at least two points per scan to track the 'trend' in phase across the scan & in time. More solution intervals means less signal to noise (S/N) but potentially can track phase better. Less that two points means more S/N **but** we cannot track the slope across each scan.
+
+If we are happy, then we use this solution interval and the task `gaincal` to derive the time dependent phase solutions. Note that `gaincal` compares the phase on each baseline with the zero phase for a point source model and uses a chi-squared minimisation method to decompose this into a per-antenna correction.
+
+```python
+# In CASA
+
+os.system('rm -rf '+inbase+'n14c3_bpcal.p0')
+default (gaincal)
+vis='n14c3.ms'
+caltable='n14c3_bpcal.p0'             
+field='1848+283'
+solint='30s'          
+refant='EF'
+gaintype='G'
+calmode='p'                     # Solve for phase only as a function of time
+gaintable=['n14c3_bpcal.K']     # Apply the delay corrections
+interp='nearest'   
+parang=T
+
+gaincal()
+```
+
+Two solutions fail for 2 spectral windows in one solution interval, which is OK to ignore because that is just a small fraction of the time on this source.
+
+* Now plot the solutions.
+
+```python
+# In CASA
+
+default(plotcal)
+caltable='n14c3_bpcal.p0'
+xaxis='time'
+yaxis='phase'
+iteration='antenna'
+subplot=431
+
+plotcal()
+```
+
+![](files/CASA_Basic_EVN_12.png "phase_time_caltable")
+
+For each spw, in a different color, the corrections have a systematic shape. These solutions are also smooth in time which means (normally) that these are ok!
+
+### <a name="bandpass">c. Bandpass correction</a>
+
+We use the bandpass calibration source 1848+283 to derive channel-by-channel corrections for phase and amplitude. We apply the phase vs. time calibration table ()`n14c3_bpcal.p0`) to allow the data to be averaged in time, and we apply the delay and Tsys/gain curve correction tables to provide preliminary per-spw corrections to the slope of the phase and the overall amplitude fluctuations with time.
+
+Since we have not provided a different model, bandpass uses a default 1 Jy model at the phase centre; hence we normalise the amplitude corrections, so there are different corrections as needed per channel but they are normalised by the overall product (over all time on this source but in each spw).
+
+* To do bandpass correction we use the aptly named task `bandpass`:
+
+```python
+#In CASA
+
+os.system('rm -rf n14c3.B')
+default(bandpass)
+vis='n14c3.ms'
+caltable='n14c3.B'           # output bandpass calibration table
+field='1848+283'
+solint='inf'
+combine='scan'               # average all the data in time
+refant='EF'    
+solnorm=T                    # Keep the product of corrections unity so the flux scale is not changed overall
+gaintable=['n14c3_bpcal.K','n14c3_bpcal.p0','n14c3.tsys','n14c3.gc']
+interp='nearest'
+parang=T
+
+bandpass()
+```
+
+The solutions fail for the end channels we have flagged but the rest are OK.
+
+* Plot the bandpass table.
+
+```
+# In CASA
+default(plotcal)
+
+caltable='n14c3.B'
+xaxis='freq'
+yaxis='phase'
+iteration='antenna'
+subplot=431
+
+plotcal()
+
+xaxis='freq'
+yaxis='amp'
+plotcal()
+```
+
+![](files/CASA_Basic_EVN_12.png "phase_time_plotms_zoom")
+
+The phase corrections are mostly small, larger close to the remaining end channels, and the amplitude corrections are close to one.
+
+### <a name="apply_cal">Apply calibration and split out phase-ref - target pairs </a>
+#### <a name="apply_init_cal">Apply the initial calibration </a>
+
+The frequency-dependent calibration i.e. delay, Tsys/gain curve and bandpass, is stable in time over the few hours of these observations and we apply these table to all sources.
+
+**Note:** we don't apply the time-dependent phase corrections for the bpcal, because these are not applicable to other sources observed at different times (usually a separate bandpass calibrator is observed before or after the main observations; these are unusual because it is also a phase-cal, but it is convenient to ignore this role here).
+
+* The default mode of `applycal` calibrates the weights (i.e. noisier solutions reduce the weighting given to the data in imaging).
+
+```python
+# In CASA
+default(applycal)
+vis='n14c3.ms'
+field=''                      # Apply to all sources
+gaintable=['n14c3.tsys','n14c3.gc','n14c3_bpcal.K','n14c3.B']
+interp='nearest'
+parang=T
+applymode='calonly'           # Interpolate or extrapolate over data with missing solutions (don't flag)
+
+applycal()
+```
+
+* And finally we should inspect the corrected data (just one polarisation for simplicity).
+
+```python
+default(plotms)
+vis='n14c3.ms'
+xaxis='freq'
+yaxis='amp'
+field='1848+283'
+ydatacolumn='corrected'   # Applying calibration creates a new 'corrected' data column
+correlation='RR'
+coloraxis='baseline'
+avgtime='3600'
+antenna='EF&*'
+
+plotms()
+
+yaxis='phase'
+plotms()
+
+xaxis='time'
+avgtime=''
+avgchannel='32'
+plotms()
+
+field=''
+coloraxis='field'
+yaxis='amp'
+plotms()
+```
+Amplitude and phase are reasonably flat as a function of frequency but different for different antennas and the phase still has a big variation with time, along with some amplitude discrepancies.
