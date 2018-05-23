@@ -16,9 +16,9 @@ It is suitable for good-quality EVN data which does not require the use of 'rate
   * [Load data and correct for Earth rotation](#Load_data_earth_rot)
   * [Fix antenna and Tsys tables](#Fix_antenna_tsys)
   * [Inspect and flag data](#Flag_auto_inspect)
-4. Frequency-related calibration
-  * Delay calibration</li>
-  * Pre-bandpass time-dependent phase correction</li>
+4. [Frequency-related calibration](#frequency_related_calibration)
+  * [Delay calibration](#Delay_calib)
+  * Pre-bandpass time-dependent phase correction
   * Bandpass correction
 5. Apply calibration and split out phase-ref - target pairs
 6. Apply the initial calibration
@@ -344,7 +344,7 @@ plotms()
 
   * You can change the plot interactively in plotms.
   * You can see 8 spw; the edges of this have low amplitudes due to poor sensitivity and there are some data all at zero.
-  * Zoom in (using <img src="files/zoom_plotms.png" width="20">) and use select to highlight bad data (<img src="files/select_plotms.png" width="20">) and use locate (<img src="files/locate_plotms.png" width="20">) to see what antenna it is associated with.
+  * Zoom in (using <img src="files/zoom_plotms.png" width="28">) and use select to highlight bad data (<img src="files/select_plotms.png" width="28">) and use locate (<img src="files/locate_plotms.png" width="28">) to see what antenna it is associated with.
   * You should find that this is mostly SV (dark green in this plot).
 
 * **Important:** Before more flagging, remember to back up the current flags. Do this any time you think you might need to change your mind about flagging; use a different version name each time and make a note of it (CASA task `flagdata` can make an automatic backup but it will not have a memorable name). The backups for this data set are stored in `n14c3.ms.flagversions`.We will now back up the flags for this data set now:
@@ -516,3 +516,88 @@ correlation='RR,LL'
 
 plotms()
 ```
+
+![](files/CASA_Basic_EVN_6.png "flagged_time_plotms_")
+
+### 4. <a name="frequency_related_calibration">Frequency-related calibration</a>
+#### a. <a name="Delay_calib">Delay calibration</a>
+[<< back to top](#top)
+
+The signal from each VLBI antenna is timestamped in order to allow synchronisation of all antennas when they are correlated. Small clock errors cause a frequency-dependent phase shift in the correlated signal, i.e. a slope of the phase across the band.
+
+* Lets examine this, and we shall average the time within each scan.
+
+```python
+# In CASA
+default(plotms)
+vis='n14c3.ms'
+xaxis='freq'
+yaxis='phase'
+field='1848+283'
+avgtime='3600s'
+antenna='EF&*'
+coloraxis='corr'
+iteraxis='baseline'
+correlation='RR,LL'
+
+plotms()
+```
+
+![](files/CASA_Basic_EVN_7.png "delay_plotms_")
+
+The phases have a random wiggle (which will be corrected later) as well as a systematic slope, which is more or less the same for each scan.
+
+* Lets pick a scan with all spw and antennas present (e.g. for the plot below I chose \#38):
+
+```python
+# In CASA
+default(plotms)
+vis='n14c3.ms'
+xaxis='scan'
+yaxis='amp'
+field='1848+283'
+spw='0~7:13~20'
+avgchannel='8'
+avgtime='3600'
+antenna='EF&*'
+coloraxis='antenna2'
+correlation='RR,LL'
+
+plotms()
+```
+
+![](files/CASA_Basic_EVN_8.png "delay_plotms_zoom")
+
+**Important:** Delay calibration derives the gradient of phase against frequency, which can divided into the complex data to remove the systematic slope.
+
+* In CASA, we can determine this using a bright source, long solution interval (so we only correct in the frequency dimension). The task `gaincal` determines this solution:
+
+```python
+# In CASA
+default(gaincal)
+vis='n14c3.ms'
+caltable='n14c3_bpcal.K'  # File name for output calibration table
+field='1848+283'
+scan='38'
+solint='150s'             # longer that the scan, to make sure just one solution
+refant='EF'               # The most sensitive antenna, with many shorter baselines, as the zero of phase.
+gaintype='K'              # Solve for delay
+parang=T                  # Apply the parallactic angle correction for the feed rotation of Alt-Az telescopes
+
+gaincal()
+```
+
+* And we shall plot this calibration table using `plotcal` again:
+
+```python
+default(plotcal)
+caltable='n14c3_bpcal.K'
+xaxis='freq'
+yaxis='delay'
+iteration='antenna'
+subplot=431
+
+plotcal()
+```
+
+![](files/CASA_Basic_EVN_8.png "delay_plotms_")
