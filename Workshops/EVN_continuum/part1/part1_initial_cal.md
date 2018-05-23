@@ -12,18 +12,14 @@ It is suitable for good-quality EVN data which does not require the use of 'rate
 
 1. [Data and supporting material](#Data_and_supporting_material)
 2. [How to use this guide](#How_to_use_this_guide)
-3. Data loading and inspection
-<ol type="a">
-  <li>Load data and correct for Earth rotation</li>
-  <li>Fix antenna and Tsys tables</li>
-  <li>Inspect and flag data</li>
-</ol>
+3. [Data loading and inspection](#Data_loading_and_inspection)
+  * [Load data and correct for Earth rotation](#Load_data_earth_rot)
+  * Fix antenna and Tsys tables
+  * Inspect and flag data
 4. Frequency-related calibration
-<ol type="a">
-  <li>Delay calibration</li>
-  <li>Pre-bandpass time-dependent phase correction</li>
-  <li>Bandpass correction</li>
-</ol>
+  * Delay calibration</li>
+  * Pre-bandpass time-dependent phase correction</li>
+  * Bandpass correction
 5. Apply calibration and split out phase-ref - target pairs
 6. Apply the initial calibration
 7. Split out each pair of sources
@@ -69,3 +65,64 @@ These are the sources:
 |2  |  J1849+3024  |  18:49:20.103406 +30.24.14.23712 | target |
 |3 |    1848+283 |   18:50:27.589825 +28.25.13.15523 |phase-cal |
 | 4 | 2023+336  | 20:25:10.842114 +33.43.00.21435 |not used |
+
+J1849+3024 is also used as bandpass calibrator because it is a bright, compact source with good data on all baselines. If you are reducing a new data set, you would check the suitability of the bandpass calibrator during early data reduction.
+
+### 2. <a name="How_to_use_this_guide">How to use this guide</a>
+
+This web page presents inputs for CASA tasks to be entered interactively at a terminal prompt for the calibration of the averaged data and initial target imaging. This is useful to examine your options and see how to check for syntax errors.
+
+* To begin with, work interactively to see what each parameter is for. This is used for the initial steps and calibration common to all sources.
+* Calibrate and image one phase-reference and target using a script (`NME_J1849.py`).
+* Use this information to enter parameters and values in `NME_3C345_skeleton.py` for the other phase-ref - target pair.
+
+**To start:**
+
+1. Make a directory called something you will remember, e.g. EVN, and work in it. (Do not do data reduction within the CASA installation).
+2. Copy the data and files you need to this directory. <path***> is the original location of these files; **Note** in general, *** means something for you to fill in. e.g:
+
+```
+mdir EVN
+cd EVN
+cp <path***>/n14c3_1_1.IDI? .
+cp <path***>/NME_DARA.tgz .
+cp <path***>/*py .
+
+tar -zxvf NME_DARA.tgz          # extract the additional material (also the scripts  which will be supplied).
+```
+
+### 3. <a name="#Data_loading_and_inspection">Data loading and inspection</a>
+
+* Check that you are in the right place with all the data.
+
+```
+pwd                   # tells you present working directory
+ls
+which should show
+
+flagSH1.flagcmd      key.py          n14c3.antab        NME_3C345_skeleton.py  NME_J1849.py
+flagSH.flagcmd       n14c3_1_1.IDI1  n14c3.gc           NME_all.py             tsys_spectrum.py
+flagTar1Ph1.flagcmd  n14c3_1_1.IDI2  NME_3C345.py       NME_DARA.tgz
+```
+
+* Now start CASA.
+
+#### <a name="#Load_data_earth_rot">a. Load data and correct for Earth rotation
+
+The first task is `importfitsidi` which converts the fits files to CASA-amicable Measurement Sets (MS). Copy these lines one at a time (when you get more familiar, some inputs can be copied together).
+```
+# in CASA
+os.system('rm -rf n14c3_prefix.ms*')              # make sure no old files are present
+
+default(importfitsidi)                            # initialise task
+inp()                                             # list all inputs
+
+fitsidifile=['n14c3_1_1.IDI1','n14c3_1_1.IDI2']   # fits files to convert
+vis='n14c3_prefix.ms'                            # output ms file name
+constobsid=True                                   # data could be processed together
+scanreindexgap_s=15                               # only separate scans if gap >15 sec (or source change)
+inp()                                             # check your inputs
+
+importfitsidi()                                   # if happy, execute the task
+inp() provide checks that you should normally carry out but the script won't repeat these for every task.
+```
