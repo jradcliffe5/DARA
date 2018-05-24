@@ -31,9 +31,9 @@ Before we start:
 The following calibration script will go through the following (note that the steps correspond to the `NME_J1849.py` script):
 
 1. [Initial inspection of data (step 1)](#Initial_inspection)
-2. Calibration using the phase-reference source
-  * Time-dependent delay and phase calibration (step 2)
-3. Apply phase solutions and image phase-ref(step 3)
+2. [Calibration using the phase-reference source](#Phase_reference_cal)
+  * [Time-dependent delay and phase calibration (step 2)](#Time_dep_delay)
+3. [Apply phase solutions and image phase-ref (step 3)](#apply_sol_first_image)
   * Check for remaining bad data (step 4)
   * Time-dependent amplitude calibration (step 5)
   * Apply amplitude and phase solutions to the phase-ref (step 6)
@@ -59,3 +59,43 @@ execfile('NME_J1849.py')
 Page through the plots. The phase-ref is in red, target in black. The phase offsets for both sources follow a similar pattern per baseline and correlation, so the phase-reference solutions should also correct the target OK. Note that JB misses every other pair of scans.
 
 ![](files/CASA_1848+283_J1849+3024.png "phase_time")
+
+### 2. <a name="Phase_reference_cal">Calibration using the phase-reference source</a>
+#### a. <a name="Time_dep_delay">Time-dependent delay and phase calibration (step 2)
+
+* First, we solve for residual delay errors for each scan on the phase-ref.
+
+![](files/CASA_1848+283_J1849+3024_1.png "time_dep_delay")
+
+* Set `mysteps=[2]` and repeat as above and look at the plot of the solutions.
+
+Normally, the bandpass and phase calibrators are different sources; since in this case they are the same, the corrections are very small.
+
+* This step also solves for phase as a function of time, averaging all channels (with the new delay corrections applied).
+
+There are a number of considerations in choosing the solution interval. Here, the phase errors do not change massively in a minute, but the S/N is high. So using 30s, half the scan length, means that all the data will be used in interpolating over the target.
+
+![](files/CASA_1848+283_J1849+3024_2.png "time_dep_phase")
+
+Each colour is a different spw. The phase corrections change more rapidly with time for the antennas on the longest baselines but if you zoom in you can see that the solutions are coherent, not just noise.
+
+### 2. <a name="apply_sol_first_image">Apply phase solutions and image phase-ref (step 3)</a>
+In VLBI, even calibration sources are often resolved (i.e. the source is not a single blob which is the size of the resolution of your array), and so by making an image is also a useful check.
+
+In `mystep=[3]`:
+
+* First, the delay and phase corrections are applied to the MS to make a corrected column using `applycal`.
+* An initial image of the phase calibrator using the task `clean` is made to see whether the calibrator is resolved.
+
+The task `clean` (which always used the corrected data column if it is present) is used for imaging. THe following notes try to decompose the steps `clean` takes to make you beautiful radio image.
+
+1. It makes a Fourier Transform (FT) of the visibility data to make what we call the 'dirty image', and also makes an FT of the uv coverage to make a 'dirty beam' or 'point spread function' (psf). The psf often has many sidelobes.
+2. `clean` also fits an idealised 2D Gaussian to the central peak of the psf. The full width half maximum (FWHM) of this Gaussian is our effective resolution or restoring beam. **Important:** The pixel size of these images is a free parameter, but you should make it such that there are at least 3, usually 5 pixels across the synthesised beam (you can characterise a Gaussian function using >3 pixels i.e. Nyquist sampled).
+3. `clean` then goes through many cycles in which it identifies the brightest pixels and then takes 10% (by default) of the flux density at each of these pixels and records the value/position in a model image. `clean` calculates the sidelobe (i.e. the model x dirty beam) response for each value/position recorder and subtracts that from the dirty map. This is known as a 'minor cycle'.
+4. After a certain number of minor cycles, the model image is Fourier transformed and subtracted from the visibility data, which are then re-FT'd back to make a new dirty image, which will have less bright emission and fewer sidelobes. This is known as a 'major cycle'.
+5. These cycles are continued (i.e. steps 3 & 4) until the final dirty image (what we call the 'residual image') is indistinguishable from the noise. The model image is then restored to the visibility data (without their sidelobes!), and the result is FT'd and this is convolved with the restoring beam to make the 'clean image' (i.e. the one you'd do science with).
+
+You can set a mask to restrict the area of the map in which clean looks for CC, based on inspection and/or prior knowledge of the source.
+
+You can roughly predict the synthesised beam size $\theta_B$ by looking at the antenna positions,
+![](files/CASA_1848+283_J1849+3024_3.png "ant_pos")
