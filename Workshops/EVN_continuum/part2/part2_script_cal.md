@@ -98,5 +98,5 @@ The task `clean` (which always used the corrected data column if it is present) 
 
 You can set a mask to restrict the area of the map in which clean looks for CC, based on inspection and/or prior knowledge of the source.
 
-You can roughly predict the synthesised beam size $$\theta_B$$ by looking at the antenna positions,
+You can roughly predict the synthesised beam size ![](http://latex.codecogs.com/gif.latex?%5Ctheta_B) by looking at the antenna positions,
 ![](../part1/files/CASA_Basic_EVN_1.png "ant_pos")
