@@ -23,6 +23,8 @@ To summarise you will need for this part:
 13:30:00.0 - 13:31:00.0    42      1 1848+283                 15840  [0,1,2,3,4,5,6,7]  [2, 2, 2, 2, 2, 2, 2, 2]
 ...
 ```
+
+### <a name="top">Preliminary steps & Outline</a>
 Before we start:
 * Look at the script in a text editor (e.g. `gedit`).
 
@@ -48,6 +50,7 @@ The following calibration script will go through the following (note that the st
   * [Image the amplitude and phase self-calibrated target (step 14)](#Selfcal_target_cal_ampim)
 
 ### 1. <a name="Initial_inspection">Initial inspection of data (step 1)</a>
+[<< back to top](#top)
 
 ```python
 # In CASA
@@ -62,6 +65,7 @@ Page through the plots. The phase-ref is in red, target in black. The phase offs
 
 ### 2. <a name="Phase_reference_cal">Calibration using the phase-reference source</a>
 #### a. <a name="Time_dep_delay">Time-dependent delay and phase calibration (step 2)
+[<< back to top](#top)
 
 * First, we solve for residual delay errors for each scan on the phase-ref.
 
@@ -80,6 +84,8 @@ There are a number of considerations in choosing the solution interval. Here, th
 Each colour is a different spw. The phase corrections change more rapidly with time for the antennas on the longest baselines but if you zoom in you can see that the solutions are coherent, not just noise.
 
 ### 2. <a name="apply_sol_first_image">Apply phase solutions and image phase-ref (step 3)</a>
+[<< back to top](#top)
+
 In VLBI, even calibration sources are often resolved (i.e. the source is not a single blob which is the size of the resolution of your array), and so by making an image is also a useful check.
 
 In `mystep=[3]` we will:
@@ -161,6 +167,7 @@ You can change the display interactively, load the dirty beam etc.
 ![](files/CASA_1848+283_J1849+3024_3.png "phs_cal_clean")
 
 #### a. <a name="Bad_data_remain">Check for remaining bad data (step 4)</a>
+[<< back to top](#top)
 
 If this was a data set no-one had looked at before, you would inspect the data manually, not in the script, in order to page through all the baselines and identify bad data, but it is not the best use of your time here, so all the flagging was already applied.
 
@@ -169,6 +176,7 @@ If this was a data set no-one had looked at before, you would inspect the data m
 ![](files/CASA_1848+283_J1849+3024_5.png "check_flags")
 
 #### b. <a name="Time_dep_amp_cal">Time-dependent amplitude calibration (step 5)</a>
+[<< back to top](#top)
 
 Whilst the application of Tsys (early in the data reduction) should scale the amplitudes, it is subject to instrumental error and the previous plot shows at least one antenna with suspiciously high amplitudes. This limits the S/N that we imaged before therefore to improve this we do amplitude calibration on the phase calibrator to improve the Tsys amplitude estimates.
 
@@ -179,6 +187,7 @@ Whilst the application of Tsys (early in the data reduction) should scale the am
 ![](files/CASA_1848+283_J1849+3024_6.png "amp_cal")
 
 #### <a name="Apply_time_dep_amp_cal"> c. Apply amplitude and phase solutions to the phase-ref (step 6)</a>
+[<< back to top](#top)
 
 * Run mysteps=[6] to apply the solutions and inspect the corrected data.
 
@@ -191,6 +200,7 @@ This plot shows only baselines to EF. There is now less scatter but there are tw
 Plotting amplitude against uv distance (for all baselines) shows that indeed there is more flux on short baselines than on long baselines i.e. the source is resolved (if it was unresolved then the flux should be the same on ALL fourier/uv scales!)
 
 #### <a name="Clean_cal_phase_ref">d. Clean the calibrated phase-ref (step 7)</a>
+[<< back to top](#top)
 
 * As before, `mysteps=[7]` needs you to set a mask interactively.
 
@@ -199,6 +209,7 @@ Plotting amplitude against uv distance (for all baselines) shows that indeed the
 After cleaning, I got a peak brightness 1.529 Jy/bm, rms 0.001 Jy/bm, S/N 1599 - a big improvement!
 
 #### <a name="Uncal_target">e. Uncalibrated target image (step 8)</a>
+[<< back to top](#top)
 
 So far, we have applied the Tsys and gain-elevation curve corrections to the amplitudes for all data, and we have applied the initial delay and bandpass corrections to all data. This phase-ref has also had more calibration applied but we have not yet applied any time-dependent calibration of phase to the target. To illustrate that we require time-dependent calibration we shall image the target without these applied! (This is not a normal step as it is useless, this is just for demonstration)
 
@@ -207,6 +218,7 @@ So far, we have applied the Tsys and gain-elevation curve corrections to the amp
 ![](files/CASA_1848+283_J1849+3024_10.png "amp_cal_image")
 
 #### <a name="apply_target">f. Apply all calibration to the target (step 9)</a>
+[<< back to top](#top)
 
 * Run `mystep=[9]`
 
@@ -216,6 +228,7 @@ In the first `applycal` all the antennas except JB are corrected. CASA task `smo
 
 ### <a name="Imaging_self_cal">4. Imaging and self-calibration of the target</a>
 #### <a name="Split_target_image"> a. Split out target 2 and image (step 10)</a>
+[<< back to top](#top)
 
 * Run mystep=[10] and clean interactively.
 
@@ -230,6 +243,7 @@ This is not as low noise as the final phase-ref image because the separation on 
 This map shows dominantly asymmetric artefacts (positive on one side of the source, negative on the other) which are due to remaining phase errors.
 
 #### <a name="Selfcal_target_cal">Self-calibrate target phase only and apply (step 11)</a>
+[<< back to top](#top)
 
 Later in the week we will discuss in more detail why a solution interval of 10 sec is used. Empirically, you see that only a few solutions fail, and it is short enough to give accurate corrections. The plot below shows that there are quite large residual corrections for some antennas, but they have structure, not just noise.
 
@@ -238,6 +252,7 @@ Later in the week we will discuss in more detail why a solution interval of 10 s
 ![](files/CASA_1848+283_J1849+3024_11.png "phasecal_sc0")
 
 #### <a name="Selfcal_target_image">Image phase self-calibrated target (step 12)</a>
+[<< back to top](#top)
 
 * Run mysteps=[12] with interactive cleaning.
 
@@ -251,6 +266,7 @@ This step plots the corrected data and the model uv amplitudes, colourised by ba
 ![](files/CASA_1848+283_J1849+3024_14.png "phasecal_sc0_amp_mod_uvdist")
 
 #### <a name="Selfcal_target_cal_amp">Self-calibrate target amplitude and phase and apply (step 13)</a>
+[<< back to top](#top)
 
 * Run mysteps=[13].
 
@@ -259,6 +275,7 @@ The amplitude errors change more slowly than phase errors and as we are applying
 ![](files/CASA_1848+283_J1849+3024_15.png "ampcal_sc1")
 
 #### <a name="Selfcal_target_cal_ampim">Image the amplitude and phase self-calibrated target (step 14)
+[<< back to top](#top)
 
 * Run mysteps=[14] with interactive cleaning.
 
