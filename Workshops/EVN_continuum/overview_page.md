@@ -1,4 +1,5 @@
 ## EVN Continuum
+#### [<< return to home page](../../index.md)
 
 The EVN continuum tutorial is split into three parts which should be done in order.
 
@@ -18,5 +19,3 @@ The webpages to guide you through the tutorials are below:
 * For stage 3, download [J1640+3946_3C345.ms.tgz](http://www.jb.man.ac.uk/~radcliff/DARA/Data_reduction_workshops/EVN_Continuum/J1640+3946_3C345.ms.tgz)
 
 You can unpack the tgz files using the UNIX command `tar` e.g. `tar -xvf NME_DARA.tgz` will unpack the files in a directory in your current area called NME_DARA.tgz
-
-## [Return to home page](../../index.md)
