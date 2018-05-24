@@ -11,7 +11,7 @@ If you don't have a good version of 1848+283_J1849+3024.ms (remove any bad versi
 To summarise you will need for this part:
 * 1848+283_J1849+3024.ms you made at the end of the initial calibration (end of part 1)
 * or, 1848+283_J1849+3024.ms.tgz (ready made)
-* NME_J1849.py
+* NME_J1849.py **included in [NME_DARA.tgz](http://www.jb.man.ac.uk/~radcliff/DARA/Data_reduction_workshops/EVN_Continuum/NME_DARA.tgz) from part1**
 
 1848+283_J1849+3024.ms contains phase-ref 1848+283 and target J1849+3024. You should have 1848+283_J1849+3024.ms.listobs made at the end of CASA_Basic_EVN which shows the interleaving of the target and phase-ref.
 
@@ -75,7 +75,7 @@ Normally, the bandpass and phase calibrators are different sources; since in thi
 
 There are a number of considerations in choosing the solution interval. Here, the phase errors do not change massively in a minute, but the S/N is high. So using 30s, half the scan length, means that all the data will be used in interpolating over the target.
 
-![](files/CASA_1848+283_J1849+3024_2.png "time_dep_phase")
+![](files/1848+283_J1849+3024.ms.p1.png "time_dep_phase")
 
 Each colour is a different spw. The phase corrections change more rapidly with time for the antennas on the longest baselines but if you zoom in you can see that the solutions are coherent, not just noise.
 
