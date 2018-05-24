@@ -42,8 +42,8 @@ The following calibration script will go through the following (note that the st
   * Apply all calibration to the target (step 9)
 4. Imaging and self-calibration of the target
   * Split out target 2 and image (step 10)
-  * Self-calibrate target phase only and apply (step 11)
-  * Image phase-self-calibrated target (step 12)
+  * [Self-calibrate target phase only and apply (step 11)](#Selfcal_target_cal)
+  * [Image phase-self-calibrated target (step 12)](#Selfcal_target_image)
   * Self-calibrate target amplitude and phase and apply (step 13)
   * Image the amplitude and phase self-calibrated target (step 14)
 
@@ -221,7 +221,7 @@ In the first `applycal` all the antennas except JB are corrected. CASA task `smo
 
 **Important** From now on, the input MS is J1849+3024.ms
 
-`Upload new attachment "_image_scaJ1849+3024_image-cal0.png"`
+![](files/target_image_init.png "init_target")
 
 I got Peak 0.211, rms 0.010, S/N 21
 
@@ -229,8 +229,18 @@ This is not as low noise as the final phase-ref image because the separation on 
 
 This map shows dominantly asymmetric artefacts (positive on one side of the source, negative on the other) which are due to remaining phase errors.
 
-#### <a name="Selfcal_target_image">Self-calibrate target phase only and apply (step 11)</a>
+#### <a name="Selfcal_target_cal">Self-calibrate target phase only and apply (step 11)</a>
 
 Later in the week we will discuss in more detail why a solution interval of 10 sec is used. Empirically, you see that only a few solutions fail, and it is short enough to give accurate corrections. The plot below shows that there are quite large residual corrections for some antennas, but they have structure, not just noise.
 
 * Run mysteps=[11]
+
+![](files/CASA_1848+283_J1849+3024_11.png "phasecal_sc0")
+
+#### <a name="Selfcal_target_image">Image phase self-calibrated target (step 12)</a>
+
+* Run mysteps=[12] with interactive cleaning.
+
+![](files/CASA_1848+283_J1849+3024_12.png "phasecal_sc0_im")
+
+I got peak of 0.256 Jy/bm, rms 0.001 Jy/bm, S/N 249 so a nice improvement
