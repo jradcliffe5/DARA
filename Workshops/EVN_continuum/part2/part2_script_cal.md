@@ -35,9 +35,9 @@ The following calibration script will go through the following (note that the st
   * [Time-dependent delay and phase calibration (step 2)](#Time_dep_delay)
 3. [Apply phase solutions and image phase-ref (step 3)](#apply_sol_first_image)
   * [Check for remaining bad data (step 4)](#Bad_data_remain)
-  * Time-dependent amplitude calibration (step 5)
-  * Apply amplitude and phase solutions to the phase-ref (step 6)
-  * Clean the calibrated phase-ref (step 7)
+  * [Time-dependent amplitude calibration (step 5)](#Time_dep_amp_cal)
+  * [Apply amplitude and phase solutions to the phase-ref (step 6)](#Apply_time_dep_amp_cal)
+  * [Clean the calibrated phase-ref (step 7)](#Clean_cal_phase_ref)
   * Uncalibrated target image (step 8)
   * Apply all calibration to the target (step 9)
 4. Imaging and self-calibration of the target
@@ -155,7 +155,7 @@ viewer('1848+283_phasecal.clean.image')
 
 You can change the display interactively, load the dirty beam etc.
 
-* The script also reports the image rms, peak and S/N. I got a peak brightness of 1.292 Jy, rms 0.040 Jy, S/N 32. You may get different numbers depending on how you set the mask and how many iterations you did, but they should be similar.
+* The script also reports the image rms, peak and S/N. I got a peak brightness of 1.292 Jy/bm, rms 0.040 Jy/bm, S/N 32. You may get different numbers depending on how you set the mask and how many iterations you did, but they should be similar.
 
 ![](files/CASA_1848+283_J1849+3024_4.png "phs_cal_pre-clean")
 ![](files/CASA_1848+283_J1849+3024_3.png "phs_cal_clean")
@@ -167,3 +167,33 @@ If this was a data set no-one had looked at before, you would inspect the data m
 * Just run `mysteps=[4]` to check. This plot shows all the baselines to EF on one plot:
 
 ![](files/CASA_1848+283_J1849+3024_5.png "check_flags")
+
+#### b. <a name="Time_dep_amp_cal">Time-dependent amplitude calibration (step 5)</a>
+
+Whilst the application of Tsys (early in the data reduction) should scale the amplitudes, it is subject to instrumental error and the previous plot shows at least one antenna with suspiciously high amplitudes. This limits the S/N that we imaged before therefore to improve this we do amplitude calibration on the phase calibrator to improve the Tsys amplitude estimates.
+
+* To do this, inspect `mysteps=[5]` and run it.
+
+`solnorm=True` means, estimate the corrections with one solution per solution interval & antenna &  polarisation. Then form the mean product of all the amplitude solutions and divide each solution by this. This means that the relative variations of the solutions with time etc. are corrected, but the product of the gains overall is unity so an image made from the data will still have the same flux scale. CASA gain solutions are divided into the data, so a high gain will correct a high amplitude, as seen for the second antenna.
+
+![](files/CASA_1848+283_J1849+3024_6.png "amp_cal")
+
+#### <a name="Apply_time_dep_amp_cal"> c. Apply amplitude and phase solutions to the phase-ref (step 6)</a>
+
+* Run mysteps=[6] to apply the solutions and inspect the corrected data.
+
+![](files/CASA_1848+283_J1849+3024_7.png "test_applycal_EF")
+
+This plot shows only baselines to EF. There is now less scatter but there are two groups of baselines with quite distinct flux densities. However, this could be due to the source being resolved.
+
+![](files/CASA_1848+283_J1849+3024_8.png "test_applycal_uv")
+
+Plotting amplitude against uv distance (for all baselines) shows that indeed there is more flux on short baselines than on long baselines i.e. the source is resolved (if it was unresolved then the flux should be the same on ALL fourier/uv scales!)
+
+#### <a name="Clean_cal_phase_ref">Clean the calibrated phase-ref (step 7)</a>
+
+* As before, `mysteps=[7]` needs you to set a mask interactively.
+
+![](files/CASA_1848+283_J1849+3024_9.png "amp_cal_image")
+
+After cleaning, I got a peak brightness 1.529 Jy/bm, rms 0.001 Jy/bm, S/N 1599 - a big improvement!
