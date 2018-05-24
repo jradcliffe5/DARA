@@ -38,7 +38,7 @@ The following calibration script will go through the following (note that the st
   * [Time-dependent amplitude calibration (step 5)](#Time_dep_amp_cal)
   * [Apply amplitude and phase solutions to the phase-ref (step 6)](#Apply_time_dep_amp_cal)
   * [Clean the calibrated phase-ref (step 7)](#Clean_cal_phase_ref)
-  * Uncalibrated target image (step 8)
+  * [Uncalibrated target image (step 8)](#Uncal_target)
   * Apply all calibration to the target (step 9)
 4. Imaging and self-calibration of the target
   * Split out target 2 and image (step 10)
@@ -190,10 +190,47 @@ This plot shows only baselines to EF. There is now less scatter but there are tw
 
 Plotting amplitude against uv distance (for all baselines) shows that indeed there is more flux on short baselines than on long baselines i.e. the source is resolved (if it was unresolved then the flux should be the same on ALL fourier/uv scales!)
 
-#### <a name="Clean_cal_phase_ref">Clean the calibrated phase-ref (step 7)</a>
+#### <a name="Clean_cal_phase_ref">d. Clean the calibrated phase-ref (step 7)</a>
 
 * As before, `mysteps=[7]` needs you to set a mask interactively.
 
 ![](files/CASA_1848+283_J1849+3024_9.png "amp_cal_image")
 
 After cleaning, I got a peak brightness 1.529 Jy/bm, rms 0.001 Jy/bm, S/N 1599 - a big improvement!
+
+#### <a name="Uncal_target">e. Uncalibrated target image (step 8)</a>
+
+So far, we have applied the Tsys and gain-elevation curve corrections to the amplitudes for all data, and we have applied the initial delay and bandpass corrections to all data. This phase-ref has also had more calibration applied but we have not yet applied any time-dependent calibration of phase to the target. To illustrate that we require time-dependent calibration we shall image the target without these applied! (This is not a normal step as it is useless, this is just for demonstration)
+
+* Run `mystep=[8]` - this does not do any cleaning because one look at the dirty image shows that it is useless.
+
+![](files/CASA_1848+283_J1849+3024_10.png "amp_cal_image")
+
+#### <a name="apply_target">f. Apply all calibration to the target (step 9)</a>
+
+* Run `mystep=[9]`
+
+The phase reference solutions are now interpolated over the target data. Since the data are taken close in time and the sources are close together on the sky, we assume that the atmospheric distortions are similar. In the plot you made above, in ['Check for remaining bad data (step 4)'](#Bad_data_remain) you see that one antenna only records every other pair of target - phase-ref scans. This is JB, and in order to allow for the longer gaps, we handle it separately (this may not always be necessary in future versions of CASA).
+
+In the first `applycal` all the antennas except JB are corrected. CASA task `smoothcal` then is used to smooth the JB solutions over an interval longer than the gaps between its pairs of scans, for each table, and then the smoothed table is applied to JB only. Parameter `interp=['nearest','nearest','nearest']` has three values because we are applying 3 calibration tables. (The default is linear for linear interpolation but this can miss data if the final phase-ref scan is missing and extrapolation is needed instead).
+
+### <a name="Imaging_self_cal">4. Imaging and self-calibration of the target</a>
+#### <a name="Split_target_image"> a. Split out target 2 and image (step 10)</a>
+
+* Run mystep=[10] and clean interactively.
+
+**Important** From now on, the input MS is J1849+3024.ms
+
+`Upload new attachment "_image_scaJ1849+3024_image-cal0.png"`
+
+I got Peak 0.211, rms 0.010, S/N 21
+
+This is not as low noise as the final phase-ref image because the separation on the sky and in time is enough for there to be small differences in atmosphere. These are corrected by self-calibration. This is the same principle as we used above using the phase reference source to derive corrections, except that in this case we only apply the corrections to the same source, the target itself. Also, in the very first round of calibration, the model is the CC made from the image we just made after applying the phase-reference solutions, i.e. it is already a good approximation to the actual structure and position of the target (without depending on a catalogue value).
+
+This map shows dominantly asymmetric artefacts (positive on one side of the source, negative on the other) which are due to remaining phase errors.
+
+#### <a name="Selfcal_target_image">Self-calibrate target phase only and apply (step 11)</a>
+
+Later in the week we will discuss in more detail why a solution interval of 10 sec is used. Empirically, you see that only a few solutions fail, and it is short enough to give accurate corrections. The plot below shows that there are quite large residual corrections for some antennas, but they have structure, not just noise.
+
+* Run mysteps=[11]
