@@ -1,4 +1,4 @@
-## Part2: Calibration and imaging of J1849+3024
+## Part 2: Calibration and imaging of J1849+3024
 ##### [<< Return to homepage](../../../index.md)
 ##### [<< Return to EVN continuum](../overview_page.md)
 
@@ -8,7 +8,7 @@ A new MS contains just a 'data' column. The previous `applycal` made a copy of t
 
 If you don't have a good version of 1848+283_J1849+3024.ms (remove any bad versions), get [1848+283_J1849+3024.ms.tgz](http://www.jb.man.ac.uk/~radcliff/DARA/Data_reduction_workshops/EVN_Continuum/1848+283_J1849+3024.ms.tgz) and extract it using `tar -zxvf 1848+283_J1849+3024.ms.tgz`.
 
-To summarise you will need for this part:
+To summarise you will need the following for this part:
 * 1848+283_J1849+3024.ms you made at the end of the initial calibration (end of part 1)
 * or, 1848+283_J1849+3024.ms.tgz (ready made)
 * NME_J1849.py **included in [NME_DARA.tgz](http://www.jb.man.ac.uk/~radcliff/DARA/Data_reduction_workshops/EVN_Continuum/NME_DARA.tgz) from part1**
