@@ -1,4 +1,3 @@
-<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default"></script>
 ## Part2: Calibration and imaging of J1849+3024
 ##### [<< Return to homepage](../../../index.md)
 ##### [<< Return to EVN continuum](../overview_page.md)
@@ -35,7 +34,7 @@ The following calibration script will go through the following (note that the st
 2. [Calibration using the phase-reference source](#Phase_reference_cal)
   * [Time-dependent delay and phase calibration (step 2)](#Time_dep_delay)
 3. [Apply phase solutions and image phase-ref (step 3)](#apply_sol_first_image)
-  * Check for remaining bad data (step 4)
+  * [Check for remaining bad data (step 4)](#Bad_data_remain)
   * Time-dependent amplitude calibration (step 5)
   * Apply amplitude and phase solutions to the phase-ref (step 6)
   * Clean the calibrated phase-ref (step 7)
@@ -83,7 +82,7 @@ Each colour is a different spw. The phase corrections change more rapidly with t
 ### 2. <a name="apply_sol_first_image">Apply phase solutions and image phase-ref (step 3)</a>
 In VLBI, even calibration sources are often resolved (i.e. the source is not a single blob which is the size of the resolution of your array), and so by making an image is also a useful check.
 
-In `mystep=[3]`:
+In `mystep=[3]` we will:
 
 * First, the delay and phase corrections are applied to the MS to make a corrected column using `applycal`.
 * An initial image of the phase calibrator using the task `clean` is made to see whether the calibrator is resolved.
@@ -99,4 +98,72 @@ The task `clean` (which always used the corrected data column if it is present) 
 You can set a mask to restrict the area of the map in which clean looks for CC, based on inspection and/or prior knowledge of the source.
 
 You can roughly predict the synthesised beam size ![](http://latex.codecogs.com/gif.latex?%5Ctheta_B) by looking at the antenna positions,
+
 ![](../part1/files/CASA_Basic_EVN_1.png "ant_pos")
+
+The max. baseline max_B is roughly 10,000 km, and we are observing at 5 GHz, so (all in metres):
+
+```python
+max_B = 10000000.
+wavelength = 0.06
+theta_B= 3600.*degrees(wavelength/max_B)   # convert from radians to degrees and thence to arcsec
+theta_B
+```
+
+You can just cut-and-paste this into CASA which returns theta_B ~ 0.001 arcsec = 1 mas. 0.0002 arcsec is thus a good pixel size. The overall image size is determined by how large you think the source is (here we assume that a phase-reference is compact) or the field of view, and this image size must be even (a power of 2 or multiples of 2,3,5,7 are fast).
+
+Here is an explanation of the relevant parameters:
+```python
+os.system('rm -rf '+phscal2+'_phasecal.clean*')   # delete any failed attempts
+clean(vis=phscal2+'_'+target2+'.ms',
+      imagename=phscal2+'_phasecal.clean',
+      field=phscal2,
+      imsize=256,                        # Image size ~50 mas should be big enough
+      cell='0.0002arcsec',               # Pixel size calculated above
+      niter=100,                         # Total number of clean iterations
+      cyclefactor=1,                     # Speed up clean with a higher ratio minor:major cycles, OK for a compact source.
+      interactive=T,                     # Set/change mask manually
+      npercycle=50,                      # Return partly-cleaned image for inspection/changing mask every 50 iterations
+      usescratch=T)                      # Write model to MS for use in calibration
+```
+* Run mystep=[3] - we will demonstrate how to set the mask.
+
+If you make a mess, you can type `execfile('clean.last')` to restore the inputs and change what you need; don't forget to delete the failed attempt first. Or just cut and paste from above, if you just messed up masking.
+
+```python
+# In CASA
+!ls -d *_phasecal.clean*
+```
+
+which shows:
+
+```python
+1848+283_phasecal.clean.flux/          # Primary beam response (in CASAv4)
+1848+283_phasecal.clean.pb/          # Primary beam response (in CASAv5+)
+1848+283_phasecal.clean.image/         # Clean image
+1848+283_phasecal.clean.mask/          # The mask you used
+1848+283_phasecal.clean.model/         # The CC
+1848+283_phasecal.clean.psf/           # Dirty (synthesised) beam
+1848+283_phasecal.clean.residual/      # Residual before restoring CC
+```
+
+* Inspect the clean image using the CASA `viewer`:
+```python
+# In CASA
+viewer('1848+283_phasecal.clean.image')
+```
+
+You can change the display interactively, load the dirty beam etc.
+
+* The script also reports the image rms, peak and S/N. I got a peak brightness of 1.292 Jy, rms 0.040 Jy, S/N 32. You may get different numbers depending on how you set the mask and how many iterations you did, but they should be similar.
+
+![](files/CASA_1848+283_J1849+3024_4.png "phs_cal_pre-clean")
+![](files/CASA_1848+283_J1849+3024_3.png "phs_cal_clean")
+
+#### a. <a name="Bad_data_remain">Check for remaining bad data (step 4)</a>
+
+If this was a data set no-one had looked at before, you would inspect the data manually, not in the script, in order to page through all the baselines and identify bad data, but it is not the best use of your time here, so all the flagging was already applied.
+
+* Just run `mysteps=[4]` to check. This plot shows all the baselines to EF on one plot:
+
+![](files/CASA_1848+283_J1849+3024_5.png "check_flags")
