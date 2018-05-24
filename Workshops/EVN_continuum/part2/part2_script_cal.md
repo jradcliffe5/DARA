@@ -39,13 +39,13 @@ The following calibration script will go through the following (note that the st
   * [Apply amplitude and phase solutions to the phase-ref (step 6)](#Apply_time_dep_amp_cal)
   * [Clean the calibrated phase-ref (step 7)](#Clean_cal_phase_ref)
   * [Uncalibrated target image (step 8)](#Uncal_target)
-  * Apply all calibration to the target (step 9)
-4. Imaging and self-calibration of the target
-  * Split out target 2 and image (step 10)
+  * [Apply all calibration to the target (step 9)](#apply_target)
+4. [Imaging and self-calibration of the target](#Imaging_self_cal)
+  * [Split out target 2 and image (step 10)](#Split_target_image)
   * [Self-calibrate target phase only and apply (step 11)](#Selfcal_target_cal)
   * [Image phase-self-calibrated target (step 12)](#Selfcal_target_image)
-  * Self-calibrate target amplitude and phase and apply (step 13)
-  * Image the amplitude and phase self-calibrated target (step 14)
+  * [Self-calibrate target amplitude and phase and apply (step 13)](#Selfcal_target_cal_amp)
+  * [Image the amplitude and phase self-calibrated target (step 14)](#Selfcal_target_cal_ampim)
 
 ### 1. <a name="Initial_inspection">Initial inspection of data (step 1)</a>
 
@@ -243,4 +243,32 @@ Later in the week we will discuss in more detail why a solution interval of 10 s
 
 ![](files/CASA_1848+283_J1849+3024_12.png "phasecal_sc0_im")
 
-I got peak of 0.256 Jy/bm, rms 0.001 Jy/bm, S/N 249 so a nice improvement
+I got peak of 0.256 Jy/bm, rms 0.001 Jy/bm, S/N 249 so a nice improvement.
+
+This step plots the corrected data and the model uv amplitudes, colourised by baseline. You can see that although the data have more scatter, the model does represent the data quite well, i.e. the CC have been located where there is real emission, not sidelobes, and the image has not missed bright emission.
+
+![](files/CASA_1848+283_J1849+3024_13.png "phasecal_sc0_amp_uvdist")
+![](files/CASA_1848+283_J1849+3024_14.png "phasecal_sc0_amp_mod_uvdist")
+
+#### <a name="Selfcal_target_cal_amp">Self-calibrate target amplitude and phase and apply (step 13)</a>
+
+* Run mysteps=[13].
+
+The amplitude errors change more slowly than phase errors and as we are applying the phase solutions we can average for longer in time to get better S/N. The solutions are mostly close to unity with no very wild ones.
+
+![](files/CASA_1848+283_J1849+3024_15.png "ampcal_sc1")
+
+#### <a name="Selfcal_target_cal_ampim">Image the amplitude and phase self-calibrated target (step 14)
+
+* Run mysteps=[14] with interactive cleaning.
+
+I got peak of 0.254 Jy/bm, rms 0.001 Jy/bm, S/N 311 so the noise is as good as for the phase-ref.
+
+![](files/CASA_1848+283_J1849+3024_16.png "ampcal_sc1_im")
+
+The differences between the uv plots of these averaged data before and after the final calibration are hard to see, but enough to make the improvement in S/N.
+
+![](files/CASA_1848+283_J1849+3024_17.png "ampcal_sc0_amp_uvdist")
+![](files/CASA_1848+283_J1849+3024_18.png "ampcal_sc0_amp_mod_uvdist")
+
+Congralulations! You have finished imaging J1849+3024. Now onto part3!
