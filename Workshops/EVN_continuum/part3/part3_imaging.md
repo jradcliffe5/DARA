@@ -1,4 +1,4 @@
-## Part 2: Calibration and imaging of 3C345
+## Part 3: Calibration and imaging of 3C345
 ##### [<< Return to homepage](../../../index.md)
 ##### [<< Return to EVN continuum](../overview_page.md)
 
@@ -31,8 +31,8 @@ For this section ensure you have the following:
 ```
 This section is organised as follows:
 1. [Writing your own script using the skeleton](#Writing_scripts)
-2. Example
-3. Time-dependent delay and phase calibration of phase-ref J1640+3946 (step 2)
+2. [Example](#Example)
+3. [Time-dependent delay and phase calibration of phase-ref J1640+3946 (step 2)](#Time_dep_delay)
 4. Apply calibration so far, image phase ref (step 3)
 5. Flagging (step 4)
 6. Time-dependent amplitude calibration of the phase-ref (step 5)
@@ -123,9 +123,25 @@ if(mystep in thesteps):
           correlation='LL,RR',
           iteraxis='baseline')
 ```
-Remember to make the indentations consistent and put a comma after all parameters except the last. When you are happy:
+**Remember to make the indentations consistent and put a comma after all parameters except the last.**
 
+When you are happy:
+
+```py
 # in CASA
 mysteps=[1]
-execfile('
+execfile('<filename>.py')
+
 You can change the plot interactively once it appears, remember to enter any additional parameters in your script.
+```
+
+## <a name="Time_dep_delayTime-dependent"> Delay and phase calibration of phase-ref J1640+3946 (step 2)</a>
+
+Continue as above for steps 2 - make sure you try entering the missing parameters yourself first, or at least identify which you need to set, but use `NME_J1849.py` for guidance if necessary, especially if a syntax error is annoying!
+
+The name of the calibration table and plotting commands are fixed to make it easier to check, but you can make more, different plots if you want.
+
+If all goes to plans, below are what the delay and phase solutions should look like.
+
+![](files/CASA_J1640+3946_3C345.png)
+![](files/CASA_J1640+3946_3C345_1.png)
