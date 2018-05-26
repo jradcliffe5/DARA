@@ -356,7 +356,7 @@ This plot shows the difference between a self-calibrated image made with natural
 
 ![](files/spec_line_7.png)
 
-### <a name="subtract_cont">b. Subtract the continuum and image the line cube (step 9)
+### <a name="subtract_cont">b. Subtract the continuum and image the line cube (step 9)</a>
 
 `uvcontsub` takes the model of Fourier transformed Clean Components in the MS and subtracts these from the corrected visibility data. In this option, this is calculated per integration for a first order (straight line with a slope) fit to the channels specified by `contchans`, interpolated across the line channels in between.
 
