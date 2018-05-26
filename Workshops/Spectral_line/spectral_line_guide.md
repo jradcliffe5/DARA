@@ -469,9 +469,143 @@ width=11) # Change if you like)
 Moment 0 is defined as:
 
 ![](https://latex.codecogs.com/png.latex?%5Cdpi%7B150%7D%20I_%7B%5Crm%20tot%7D%28%5Calpha%2C%5Cdelta%29%20%3D%20%5CDelta%5Cnu%5Csum%5E%7B%5Crm%20N_%7Bchan%7D%7D_%7Bi%3D1%7DS_%5Cnu%28%5Calpha%2C%5Cdelta%2C%5Cnu_i%29)
+
 for intensity I per velocity channel, at each pixel, summed across all channels of width dV, in units Jy/beam km/s
 
 Moment 1 is defined as:
 
+![](https://latex.codecogs.com/png.latex?%5Cdpi%7B150%7D%20%5Cbar%20v%28%5Calpha%2C%5Cdelta%29%20%3D%20%5Cfrac%7B%5Csum%5E%7B%5Crm%20N_%7Bchan%7D%7D_%7Bi%3D1%7D%5Cnu_iS_%5Cnu%28%5Calpha%2C%5Cdelta%2C%5Cnu_i%29%7D%7B%5Csum%5E%7B%5Crm%20N_%7Bchan%7D%7D_%7Bi%3D1%7DS_%5Cnu%28%5Calpha%2C%5Cdelta%2C%5Cnu_i%29%7D)
+
 in units km/s (where V is velocity)
-Load the line image cube in the viewer, go to a channel with strong absoprtion such as 60 and select the moments tool. This will present the spectral profiler. Draw an ellipse round the core and see the spectrum. Shift-click in the spectral profile tool to select the channels covering the line. Select the zeroth moment (total intensity). Note the start and stop channels (approximately) and click on Collapse.
+
+* Load the line image cube in the viewer, go to a channel with strong absoprtion such as 60 and select the moments tool. This will present the spectral profiler.
+* Draw an ellipse round the core and see the spectrum.
+* Shift-click in the spectral profile tool to select the channels covering the line.
+* Select the zeroth moment (total intensity).
+* Note the start and stop channels (approximately) and click on Collapse.
+
+![](files/spec_line_9.png)
+
+* Or you can script this using the task `immoments`
+
+```py
+# In CASA
+os.system('rm -rf NGC660_line.clean.mom0')
+immoments(imagename='NGC660_line.clean.image',
+moments=[0],
+chans='XX~YY',# set channel range so we just cover the line signal
+outfile='NGC660_line.clean.mom0')
+```
+
+When making the first moment, flux-weighted velocity, you need to exclude the noise. About 4 x the rms (see the end of step 9) is about right for the lower limit, as a negative; set a high upper limit to exclude since we are only interested in absorption.
+
+```py
+# In CASA
+os.system('rm -rf NGC660_line.clean.mom1')
+immoments(imagename='NGC660_line.clean.image',
+moments=[1],
+chans='XX~YY', # Channel range just covering the line signal
+excludepix=[XXX,1], # Set the lower limit to the negative of about 4x noise rms
+outfile='NGC660_line.clean.mom1')
+```
+![](files/spec_line_10.png)
+
+This shows the zeroth moment and the first moment made using a cutoff of -0.002 Jy/bm, with some tweaking of the colour scale. You can see a gradient from blue-shifted at the side of the more prominent NE jet, to redshifted towards the weaker counter-jet.
+
+### <a name="extract_plot_spectra">Extract and plot spectra (step 12)</a>
+
+* Load the spectral cube in the viewer, go to a channel with strong absorption e.g. 60, and overplot the continuum contours.
+* Click on the spectral profile tool.
+* Draw 3 ellipses on the core and in the direction of the NE jet and the fainter counter-jet.
+
+In practice, you might have other information to help decide where it is interesting to extract a spectrum. When you click in one of the ellipses, the spectrum appears in the spectral profile tool. You can also get the coordinates (in pixels) from the Region tab.
+
+![](files/spec_line_11.png)
+![](files/spec_line_12.png)
+
+Scripting uses a tool, `ia` (which stands for for image analysis) to extract the spectra and then we can use raw python to make a plot. This is particularly convenient to put into a script for future use. The following describes how we do that!
+
+* Define the centres of the three positions; I have set all the radii to 6 pixels (what is that in arcsec?) but they don't have to be the same. This is a python dictionary, where the keys ('jet' etc.) are associated with a value (the definition of each circle).
+
+```py
+# In CASA
+rgns={'jet':'circle[[123.3pix, 133.6pix], 6pix]',
+'core':'circle[[129.3pix, 126.0pix], 6pix]',
+'cjet':'circle[[134.5pix, 118.6pix], 6pix]',
+'rms':'box[[10pix,10pix],[100pix,50pix]]'}
+```
+
+* Use the `ia` tool to get the spectral profile at each of the 3 positions and an off-source noise box and write them to text files.
+
+```py
+#python
+ia.open('NGC660_line.clean.image')
+for r in rgns:
+  outfile=open(r+'.spec', 'w')# create empty text files called 'jet.spec' etc. in writeable mode
+  f=ia.getprofile(axis = 3, # extract the profile and store it in variable f
+      function = 'flux',
+      region = rgns[r],
+      unit='km/s',
+      spectype='radio velocity')
+  for z in zip(f['coords'],f['values']):# python to extract the velocity and flux arrays from f in a suitable format
+    print >> outfile, z[0], z[1] # print these to the outfile
+  outfile.close()
+ia.close()
+```
+We could have passed the profiles directly to a plotter, but like this, you now have the \*.spec files on disk to use as you like.
+
+* We use python to plot the spectra:
+
+```py
+import matplotlib.pyplot as plt
+cols={'jet':'b','core':'g','cjet':'r','rms':'k'}
+# The colors for each spectrum (use help(plt.colors) for others)
+plt.clf() # clear previous plots
+for i in range(len(rgns)):
+  v=[];f=[]
+  for l in open(rgns.keys()[i]+'.spec'): # Read the disk files back into arrays
+    v.append(float(l.split()[0])) # Array of velocities for x-axis
+    f.append(float(l.split()[1])) # Array of flux density values for y-axis
+    plt.plot(v,f,color=cols[rgns.keys()[i]])  # Plot the spectra
+    plt.text(1000,(-0.003-i*0.002),rgns.keys()[i],color=cols[rgns.keys()[i]]) # Plot some labels, underneath each other.
+plt.xlabel('Velocity (LSR, km/s)')
+plt.ylabel('Flux density per channel per 12-mas radius')
+plt.title('NGC660 HI velocity profiles')
+plt.savefig('NGC660_HIvelocityprofiles.png') # Write the plot to a png
+```
+![](files/spec_line_13.png)
+
+### <a name="optical_depth">c. Make an optical depth map (step 13)</a>
+
+In the optically thin approximation, optical depth is given by:
+
+![](https://latex.codecogs.com/png.latex?%5Cdpi%7B150%7D%20%5Ctau%20%5Capprox%20-%5Cln%5Cleft%28%5Cfrac%7B%7CI_L%7C%7D%7BI_C%7D%20%5Cright%20%29)
+
+ where ![](https://latex.codecogs.com/png.latex?%5Cdpi%7B100%7D%20I_L) is the flux density of the continuum-subtracted line and ![](https://latex.codecogs.com/png.latex?%5Cdpi%7B100%7D%20I_C) is the flux density of the continuum. This can be done for single planes of the cube or for an average of many planes.
+
+ We are going to make an average of the most intense absorption, e.g. below half-minimum:
+
+ ```py
+ # in CASA
+os.system('rm -rf NGC660_line.mean')
+immoments(imagename='NGC660_line.clean.image',
+moments=[-1],
+chans='55~69',
+excludepix=[-0.002,1],
+outfile='NGC660_line.mean')
+```
+
+* Expressions such as for optical depth can be coded in `immath`:
+
+```py
+# in CASA
+os.system('rm -rf NGC660.tau') immath(imagename=['NGC660_contap1.clean.image','NGC660_line.mean'],
+mode='evalexpr',
+ expr='-1.*log(-1.*IM1/IM0)',
+ outfile='NGC660.tau')
+```
+* In the viewer, set the range of values to [0,1] to exclude noise pixels
+
+![](files/spec_line_14.png)
+
+Hooray, that completes the spectral line guide. For more information of the science refer to the Argo+15 paper!
