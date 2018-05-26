@@ -2,7 +2,7 @@
 ##### [<< Return to homepage](../../../index.md)
 ##### [<< Return to EVN continuum](../overview_page.md)
 
-This page expects that you have completed [part 1](../part1/part1_initial_cal.md) to get as far as applying the Tsys/gain curve, initial delay and bandpass corrections to all sources and split out 1848+283_J1849+3024.ms (and also to become familiar with the basics of CASA).
+This page expects that you have completed [part 1](../part1/part1_initial_cal.md) to get as far as applying the Tsys/gain curve, initial delay and bandpass corrections to all sources and split out `1848+283_J1849+3024.ms` (and also to become familiar with the basics of CASA).
 
 A new MS contains just a 'data' column. The previous `applycal` made a copy of the data with calibration applied, writing a 'corrected' column into the MS and split then took just that column and wrote new data sets, where this becomes a 'data' column.
 

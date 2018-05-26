@@ -1,6 +1,6 @@
 ## Spectral Line NGC660 Hydrogen Absorption
 
-NGC660 is a nearby starburst galaxy with hydrogen absorption against a nuclear outburst observed in 2013 (see Argo+2015.pdf). It was observed using the EVN.
+NGC660 is a nearby starburst galaxy with hydrogen absorption against a nuclear outburst observed in 2013 (see [Argo+2015.pdf](1507.01781.pdf)). It was observed using the EVN.
 
 The guide starts with a data set which has already been flagged and calibrated using the instrumental corrections and calibration derived from astrophysical sources including phase referencing. This was done in AIPS and the split-out, calibrated data `NGC660.FITS` are in UVFITS format.
 
