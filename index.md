@@ -12,11 +12,11 @@ This website consolidates teaching materials used in data processing schools. Fo
 ## Lectures
 
 * Kenya
-  [comment]: <- [2017](Kenya_lectures/2017.md)>
-  - [](http://www.jb.man.ac.uk/~radcliff/DARA/Kenya_Lectures_2017.html)
+  [//]: # ([2017](Kenya_lectures/2017.md)
+  - [2017](http://www.jb.man.ac.uk/~radcliff/DARA/Kenya_Lectures_2017.html)
 * Zambia
-  [comment]: <- [2017](Zambia_lectures/2017.md)>
-  - [](http://www.jb.man.ac.uk/~radcliff/DARA/Kenya_Lectures_2017.html)
+  [//]: # ([2017](Zambia_lectures/2017.md))
+  - [2017](http://www.jb.man.ac.uk/~radcliff/DARA/Kenya_Lectures_2017.html)
 
 
 ## Workshops
