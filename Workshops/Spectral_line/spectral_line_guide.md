@@ -37,6 +37,7 @@ The interactive parts will be demonstrated. An outline with the corresponding st
 
 
 ## <a name="Data_support">Data and supporting material</a>
+[<< back to top](#top)
 
 * NGC660.FITS UVfits data set with instrumental and calibration source corrections applied - needed to run from start of this script.
 * NGC660shift.ms.tgz data set for starting at step 8 (you make this yourself if working through steps 1-7).
@@ -55,7 +56,7 @@ If you are working from this web page you need to enter some values yourself but
 
 ## <a name="Improve_calibration">Improving calibration of NGC660</a>
 ### <a name="Convert_sort">a. Convert data to MS, sort and list (step 1)</a>
-
+[<< back to top](#top)
 
 * These data are from AIPS, which exports visibilities in UVFITS format, therefore we need to convert to a measurement set first:
 
@@ -94,6 +95,7 @@ Antennas: 7:
 ```
 
 ### <a name="Plot_vis_flag">b. Plot visibility spectrum, identify continuum, flag bad data (step 2)</a>
+[<< back to top](#top)
 
 As before, EF (Effelsberg) is the most sensitive antenna and is used as the reference antenna.
 * Plot amplitude against channel. Note that the end channels and some around channel 775 have been flagged.
@@ -146,6 +148,7 @@ inpfile='NGC660.flagcmd')
 ![](files/spec_line_3.png)
 
 ### <a name="Plot_amp_uv">c. Plot amplitude against uv distance (step 3)</a>
+[<< back to top](#top)
 
 ```py
 # In CASA
@@ -166,6 +169,7 @@ cellsize='x.xxxarcsec'
 ```
 
 ### <a name="First_image">d. Make the first image (step 4)</a>
+[<< back to top](#top)
 
 The galaxy position was only known to about an arcsecond so we make a ~2" image.
 
@@ -185,6 +189,7 @@ niter=100, interactive=True, npercycle=25)
 ```
 
 ### <a name="Find_source">e. Find the source position (step 5)</a>
+[<< back to top](#top)
 
 * Display `NGC660_cont0.clean.image` in the viewer.
 
@@ -218,6 +223,7 @@ Fit on NGC660_cont0.clean.image component 0 Position ---
 This offset is about 1 arcsec which is well within the primary beam and should not affected by bandwidth or time smearing.
 
 ### <a name="shift_to_source">f. Shift the uv phase to centre on the peak and make an image (step 6)</a>
+[<< back to top](#top)
 
 The task `fixvis` is used to calculate and apply the phase shifts needed to place the source at the centre of the field. This makes continuum subtraction more accurate as well as making imaging more convenient.
 
@@ -261,6 +267,8 @@ print 'Peak %6.3f, rms %6.3f, S/N %6.0f' % (peak, rms, peak/rms)
 I got a peak brightness 0.103 Jy/bm, rms 0.009 Jy/bm, S/N 11
 
 ### <a name="self_calibrate">g. Self-calibrate (step 7)</a>
+[<< back to top](#top)
+
 The visibility amplitudes show that there is good signal to noise on all baselines to EF. The data are mostly well calibrated but there are the discrepant amplitudes noted above, so solve for amplitude and phase. Note that the parallactic angle correction was applied prior to creating the data set we loaded.
 
 * Look at the zoomed plot of amplitude against time at the end of Step 2. The systematic trands in the amplitude errors seem to be greater than the noise scatter on timescales between 20-60 sec, so pick a solution interval in this range.
@@ -289,6 +297,8 @@ applymode='calonly')
 ```
 
 ## <a name="Image_cont_sub_cube">3. Image the calibrated continuum, subtract continuum from the line and make the line cube</a>
+[<< back to top](#top)
+
 If you performed steps 1-7 you should have `NGC660shift.ms`, but if not, a copy is provided.
 
 **ONLY IF** you don't have NGC660shift.ms or if you have problems with your current copy:
@@ -297,6 +307,8 @@ If you performed steps 1-7 you should have `NGC660shift.ms`, but if not, a copy 
 * `tar -zxvf NGC660shift.ms.tgz`
 
 ### <a name="Image_cal_cont">a. Image the calibrated continuum (step 8)</a>
+[<< back to top](#top)
+
 If you did not do this already, look at the first plot in step 2 above.
 
 * Select the continuum channel ranges, excluding about 100 channels around the line and define this as contchans (fill in xxx and yyy) & enter into CASA:
@@ -357,6 +369,7 @@ This plot shows the difference between a self-calibrated image made with natural
 ![](files/spec_line_7.png)
 
 ### <a name="subtract_cont">b. Subtract the continuum and image the line cube (step 9)</a>
+[<< back to top](#top)
 
 `uvcontsub` takes the model of Fourier transformed Clean Components in the MS and subtracts these from the corrected visibility data. In this option, this is calculated per integration for a first order (straight line with a slope) fit to the channels specified by `contchans`, interpolated across the line channels in between.
 
@@ -437,12 +450,14 @@ I got a max. absorption of -0.0614, in chan 60, rms 0.0005, S/N 113
 * Take a look at the cube in the viewer and experiment with the look-up table and so on. You can also open the continuum image on top as contours.
 
 ## <a name="im_cube_analysis">4. Image cube analysis</a>
+[<< back to top](#top)
 
 By the end of steps 8 and 9 you should have your own line and continuum images, but if not, untar `NGC660_line.clean.image.tgz` and `NGC660_contap1.clean.image.tgz` as described before step 8.
 
 Some of the analysis steps here, i.e. PV slicing, making moments and extracting spectra, can be done interactively in the viewer, which is useful for deciding what parts of the image to include, but it is then better to script using the equivalent tasks so that you can repeat the steps.
 
 ### <a name="pv_plot">a. Make a position-velocity plot (step 10)</a>
+[<< back to top](#top)
 
 You can collapse the spatial dimension along an arbitrary direction and plot the averaged flux density against velocity, known for short as a PV plot.
 
@@ -465,6 +480,7 @@ width=11) # Change if you like)
 ```
 
 ### <a name="moments">b. Make moments (step 11)</a>
+[<< back to top](#top)
 
 Moment 0 is defined as:
 
@@ -513,6 +529,7 @@ outfile='NGC660_line.clean.mom1')
 This shows the zeroth moment and the first moment made using a cutoff of -0.002 Jy/bm, with some tweaking of the colour scale. You can see a gradient from blue-shifted at the side of the more prominent NE jet, to redshifted towards the weaker counter-jet.
 
 ### <a name="extract_plot_spectra">c. Extract and plot spectra (step 12)</a>
+[<< back to top](#top)
 
 * Load the spectral cube in the viewer, go to a channel with strong absorption e.g. 60, and overplot the continuum contours.
 * Click on the spectral profile tool.
@@ -576,6 +593,7 @@ plt.savefig('NGC660_HIvelocityprofiles.png') # Write the plot to a png
 ![](files/spec_line_13.png)
 
 ### <a name="optical_depth">d. Make an optical depth map (step 13)</a>
+[<< back to top](#top)
 
 In the optically thin approximation, optical depth is given by:
 
