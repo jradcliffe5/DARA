@@ -20,20 +20,20 @@ The interactive parts will be demonstrated. An outline with the corresponding st
 1. [Data and supporting material](#Data_support)
 2. [Improving calibration of NGC660](#Improve_calibration)
   * [Convert data to MS, sort and list (step 1)](#Convert_sort)
-  * Plot visibility spectrum, identify continuum, flag bad data (step 2)
-  * Plot amplitude against uv distance (step 3)
-  * Make the first image (step 4)
-  * Find the source position (step 5)
-  * Shift the uv phase to centre on the peak and make an image (step 6)
-  * Self-calibrate (step 7)
-3. Image the calibrated continuum, subtract continuum from the line and make the line cube
-  * Image the calibrated continuum (step 8)
-  * Subtract the continuum and image the line cube (step 9)
-4. Image cube analysis
-  * Make a position-velocity plot (step 10)
-  * Make moments (step 11)
-  * Extract and plot spectra (step 12)
-  * Make an optical depth map (step 13)
+  * [Plot visibility spectrum, identify continuum, flag bad data (step 2)](#Plot_vis_flag)
+  * [Plot amplitude against uv distance (step 3)](#Plot_amp_uv)
+  * [Make the first image (step 4)](#First_image)
+  * [Find the source position (step 5)](#Find_source)
+  * [Shift the uv phase to centre on the peak and make an image (step 6)](#shift_to_source)
+  * [Self-calibrate (step 7)](#self_calibrate)
+3. [Image the calibrated continuum, subtract continuum from the line and make the line cube](#Image_cont_sub_cube)
+  * [Image the calibrated continuum (step 8)](#Image_cal_cont)
+  * [Subtract the continuum and image the line cube (step 9)](#subtract_cont)
+4. [Image cube analysis](#im_cube_analysis)
+  * [Make a position-velocity plot (step 10)](#pv_plot)
+  * [Make moments (step 11)](#moments)
+  * [Extract and plot spectra (step 12)](#extract_plot_spectra)
+  * [Make an optical depth map (step 13)](#optical_depth)
 
 
 ## <a name="Data_support">Data and supporting material</a>
@@ -103,7 +103,7 @@ As before, EF (Effelsberg) is the most sensitive antenna and is used as the refe
 plotms(vis='NGC660.ms',
 xaxis='channel', yaxis='amp',
 avgtime='36000', antenna='EF&*',
-iteraxis='baseline', avgscan=T)
+iteraxis='baseline', avgscan=True)
 ```
 
 ![](files/spec_line_1.png)
@@ -512,7 +512,7 @@ outfile='NGC660_line.clean.mom1')
 
 This shows the zeroth moment and the first moment made using a cutoff of -0.002 Jy/bm, with some tweaking of the colour scale. You can see a gradient from blue-shifted at the side of the more prominent NE jet, to redshifted towards the weaker counter-jet.
 
-### <a name="extract_plot_spectra">Extract and plot spectra (step 12)</a>
+### <a name="extract_plot_spectra">c. Extract and plot spectra (step 12)</a>
 
 * Load the spectral cube in the viewer, go to a channel with strong absorption e.g. 60, and overplot the continuum contours.
 * Click on the spectral profile tool.
@@ -575,7 +575,7 @@ plt.savefig('NGC660_HIvelocityprofiles.png') # Write the plot to a png
 ```
 ![](files/spec_line_13.png)
 
-### <a name="optical_depth">c. Make an optical depth map (step 13)</a>
+### <a name="optical_depth">d. Make an optical depth map (step 13)</a>
 
 In the optically thin approximation, optical depth is given by:
 

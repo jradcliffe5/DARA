@@ -128,9 +128,9 @@ clean(vis=phscal2+'_'+target2+'.ms',
       cell='0.0002arcsec',               # Pixel size calculated above
       niter=100,                         # Total number of clean iterations
       cyclefactor=1,                     # Speed up clean with a higher ratio minor:major cycles, OK for a compact source.
-      interactive=T,                     # Set/change mask manually
+      interactive=True,                     # Set/change mask manually
       npercycle=50,                      # Return partly-cleaned image for inspection/changing mask every 50 iterations
-      usescratch=T)                      # Write model to MS for use in calibration
+      usescratch=True)                      # Write model to MS for use in calibration
 ```
 * Run mystep=[3] - we will demonstrate how to set the mask.
 
