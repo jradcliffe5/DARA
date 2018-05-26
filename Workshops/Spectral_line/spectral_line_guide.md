@@ -79,7 +79,9 @@ setToCasaOrder(inputMS='NGC660_unsort.ms', outputMS='NGC660.ms')
 os.system('rm -rf NGC660.ms.listobs')
 listobs(vis='NGC660.ms', listfile='NGC660.ms.listobs')
 ```
+
 The `listobs` output shows that NGC660 is the only source in the data, and there is just one spw with 1024 channels. There are 7 antennas.
+
 ```
 Fields: 1
 ID Code Name RA Decl Epoch SrcId nRows
@@ -91,7 +93,7 @@ Antennas: 7:
 ...
 ```
 
-###<a name="Plot_vis_flag">b. Plot visibility spectrum, identify continuum, flag bad data (step 2)</a>
+### <a name="Plot_vis_flag">b. Plot visibility spectrum, identify continuum, flag bad data (step 2)</a>
 
 As before, EF (Effelsberg) is the most sensitive antenna and is used as the reference antenna.
 * Plot amplitude against channel. Note that the end channels and some around channel 775 have been flagged.
@@ -163,13 +165,13 @@ This shows that the dropouts have gone.
 cellsize='x.xxxarcsec'
 ```
 
-###<a name="First_image">d. Make the first image (step 4)</a>
+### <a name="First_image">d. Make the first image (step 4)</a>
 
 The galaxy position was only known to about an arcsecond so we make a ~2" image.
 
 Remember to:
 * Set parameter `contchans` from step 2
-* Set suitable number of pixels (paramter `imsize`) to cover about 2 arcsec
+* Set suitable number of pixels (parameter `imsize`) to cover about 2 arcsec
 * and set `cellsize` based upon the calculation above.
 
 ```py
@@ -182,7 +184,7 @@ cell=cellsize, weighting='natural',
 niter=100, interactive=True, npercycle=25)
 ```
 
-###<a name="Find_source">e. Find the source position (step 5)</a>
+### <a name="Find_source">e. Find the source position (step 5)</a>
 
 * Display `NGC660_cont0.clean.image` in the viewer.
 
@@ -215,7 +217,7 @@ Fit on NGC660_cont0.clean.image component 0 Position ---
 
 This offset is about 1 arcsec which is well within the primary beam and should not affected by bandwidth or time smearing.
 
-###<a name="shift_to_source">f. Shift the uv phase to centre on the peak and make an image (step 6)</a>
+### <a name="shift_to_source">f. Shift the uv phase to centre on the peak and make an image (step 6)</a>
 
 The task `fixvis` is used to calculate and apply the phase shifts needed to place the source at the centre of the field. This makes continuum subtraction more accurate as well as making imaging more convenient.
 
