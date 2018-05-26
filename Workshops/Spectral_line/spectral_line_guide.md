@@ -296,7 +296,7 @@ If you performed steps 1-7 you should have `NGC660shift.ms`, but if not, a copy 
 * Move or delete any existing NGC660shift.ms and
 * `tar -zxvf NGC660shift.ms.tgz`
 
-### <a name="Image_cal_cont">Image the calibrated continuum (step 8)</a>
+### <a name="Image_cal_cont">a. Image the calibrated continuum (step 8)</a>
 If you did not do this already, look at the first plot in step 2 above.
 
 * Select the continuum channel ranges, excluding about 100 channels around the line and define this as contchans (fill in xxx and yyy) & enter into CASA:
@@ -322,3 +322,158 @@ cell=cellsize, weighting='briggs',
 robust=0, niter=200,
 interactive=True, npercycle=50)
 ```
+
+* Inspect the image
+
+```py
+# in CASA
+viewer('NGC660_contap1.clean.image')
+```
+You can measure the peak (or rms) by drawing a box around (or excluding) the source and double-clicking, which gives values in the terminal.
+
+* Measure the peak and rms using the task `imstat` (so you can use a standard box, for example)
+
+```py
+# In CASA
+imstat(imagename='NGC660_contap1.clean.image',
+box='blcx,blcy,trcx,trcy') # Set blc and trc to enclose the source
+```
+
+This produces a list (actually a python dictionary) of values. It is easier to extract just the ones we want:
+
+```py
+# In CASA
+rms=imstat(imagename='NGC660_contap1.clean.image',
+box='offblcx,offblcy,offtrcx,offtrcy')['rms'][0] # Set blc and trc of a largeish box well clear of the source
+peak=imstat(imagename='NGC660_cont1.clean.image',
+box='blcx,blcy,trcx,trcy')['max'][0] # Set blc and trc to enclose the source
+print 'Peak %6.3f, rms %6.3f, S/N %6.0f' % (peak, rms, peak/rms)
+```
+
+I got a peak brightness of 0.0760 Jy/b, rms 0.0003 Jy/b, S/N 231 which is a great improvement on the pre-self-cal values in step 6; the lower peak is due to the smaller beam size.
+
+This plot shows the difference between a self-calibrated image made with natural weighting (lower noise - more sensitive to extended emission) and this image made with robust=0 (higher resolution).
+
+![](files/spec_line_7.png)
+
+### <a name="subtract_cont">b. Subtract the continuum and image the line cube (step 9)
+
+`uvcontsub` takes the model of Fourier transformed Clean Components in the MS and subtracts these from the corrected visibility data. In this option, this is calculated per integration for a first order (straight line with a slope) fit to the channels specified by `contchans`, interpolated across the line channels in between.
+
+* Let's remove the continuum:
+```py
+# In CASA
+os.system('rm -rf NGC660shift.ms.contsub*')
+uvcontsub(vis='NGC660shift.ms',
+fitspw=contchans, fitorder=1)
+```
+
+This produces an MS ()`NGC660shift.ms.contsub`) which should have just noise remaining in the `contchans`.
+
+In order to get an image cube with the correct velocities, you need to set the line rest frequency. Assuming that you only remember the rough rest frequency of the HI 21-cm line, you can get an accurate value using CASA task `slsearch`:
+
+```py
+slsearch(freqrange=[1.42,1.43],# Set approx. lower and upper frequency limits in GHz
+rrlinclude=False, # Don't include radio recombination lines
+logfile='NGC660_HIrest.log', # Outfile
+verbose=True,# Replace any previous outfile
+append=False)
+```
+
+which should output something like:
+```
+This gave me
+{{{
+SPECIES RECOMMENDED CHEMICAL_NAME FREQUENCY QUANTUM_NUMBERS INTENSITY SMU2 LOGA EL EU LINELIST
+H-atom      * Atomic Hydrogen 1.420410 2S1/2,F=1-0 -9.06120 0.00026 -14.54125 0.00000 0.06817 JPL
+ g-CH3CH2OH * gauche-Ethanol 1.420760 35(7,28)-35(7,29),vt -9.81460 4.41121 -11.68321 641.53949 641.60767 JPL
+CH3NH2      * Methylamine    1.422950 17(0)E2+1-16(3)E2+1, 0.00000 0.00700 -12.62939 324.64233 324
+...
+```
+
+where HI is the very first entry, at 1.420410 GHz.
+
+* Next we select the line channels in between to image.
+
+The default in clean, which we have used so far, is to average all channels to make a continuum map. Now, use `mode='channel'` to image each channel separately (or as determined by parameter width, if you want to average for more sensitivity).
+
+* Choose the start channel as the end of the first chunk of continuum, and set `nchans` to the number of central channels which you did not use for continuum (i.e. the number of channels for the output cube, not the original channel number).
+
+**Note** By default CASA uses the radio convention for converting frequency shift to velocity, that is:
+
+![](https://latex.codecogs.com/gif.latex?v%20%3D%20c*%20%5Cfrac%7B%5Cnu_%7B%5Crm%20rest%7D-%5Cnu_%7B%5Crm%20obs%7D%7D%7B%5Cnu_%7B%5Crm%20rest%7D%7D)
+
+* Once clean starts, scroll through to the central channels (e.g. 60) where you can see absorption, select all channels and set a mask.
+
+```py
+# In CASA
+os.system('rm -rf NGC660_line.clean*')
+clean(vis='NGC660shift.ms.contsub',
+imagename='NGC660_line.clean',
+field='NGC660',
+mode='channel', # Clean each channel separately
+start=***, # Set to the first channel in the interval between the line free channels (contchans)
+width=1,# No averaging
+nchan=***, # Set to the number of channels needed to cover the line, up to the other end of the interval
+outframe='lsrk', # Use the Local Standard of Rest reference frame
+restfreq='X.XXXXXXGHz',# Set the accurate rest frequency for HI
+imsize=256,
+cell=cellsize,# You should have set cellsize from step 3
+weighting='briggs',
+robust=0,
+niter=100, interactive=True,
+npercycle=25)
+```
+
+* We can use `imstat` to provide statistics for the whole cube, and the channel with the minimum can be identified:
+
+```py
+rms=imstat(imagename='NGC660_line.clean.image', box='6,200,250,250')['rms'][0]
+peak=imstat(imagename='NGC660_line.clean.image', box='100,100,156,156')['min'][0]
+peakchan=imstat(imagename='NGC660_line.clean.image', box='100,100,156,156')['minpos'][3]
+print 'Max. absorption %6.4f, in chan %3i, rms %6.4f, S/N %6.0f' % (peak, peakchan, rms, abs(peak/rms))
+```
+
+I got a max. absorption of -0.0614, in chan 60, rms 0.0005, S/N 113
+
+* Take a look at the cube in the viewer and experiment with the look-up table and so on. You can also open the continuum image on top as contours.
+
+## <a name="im_cube_analysis">4. Image cube analysis</a>
+
+By the end of steps 8 and 9 you should have your own line and continuum images, but if not, untar `NGC660_line.clean.image.tgz` and `NGC660_contap1.clean.image.tgz` as described before step 8.
+
+Some of the analysis steps here, i.e. PV slicing, making moments and extracting spectra, can be done interactively in the viewer, which is useful for deciding what parts of the image to include, but it is then better to script using the equivalent tasks so that you can repeat the steps.
+
+### <a name="pv_plot">a. Make a position-velocity plot (step 10)</a>
+
+You can collapse the spatial dimension along an arbitrary direction and plot the averaged flux density against velocity, known for short as a PV plot.
+
+* Display NGC660_line.clean.image in the viewer and select channel 60, to decide where to draw the slice, along the jet axis.
+* In the Regions PV tab, change the coordinates to pixels and set the width to 11 pixels. Note the values (to use in the equivalent task) and create the PV plot.
+
+![](files/spec_line_8.png)
+
+This shows the peak channel of the image on the left, overlaid with the slice I drew, and the PV diagram on the right (using the rainbow4 look-up table; black is most negative, yellow approx. noise level)
+
+* You can do the same using `impv`:
+
+```py
+# In CASA
+impv(imagename='NGC660_line.clean.image',
+outfile='NGC660.pv', # Set limits as identified in the viewer #
+start=[blc1,trc1],
+end=[blc2,trc2],
+width=11) # Change if you like)
+```
+
+### <a name="moments">b. Make moments (step 11)</a>
+
+Moment 0 is defined as:
+
+![](https://latex.codecogs.com/png.latex?%5Cdpi%7B150%7D%20I_%7B%5Crm%20tot%7D%28%5Calpha%2C%5Cdelta%29%20%3D%20%5CDelta%5Cnu%5Csum%5E%7B%5Crm%20N_%7Bchan%7D%7D_%7Bi%3D1%7DS_%5Cnu%28%5Calpha%2C%5Cdelta%2C%5Cnu_i%29)
+for intensity I per velocity channel, at each pixel, summed across all channels of width dV, in units Jy/beam km/s
+
+Moment 1 is defined as:
+
+in units km/s (where V is velocity)
+Load the line image cube in the viewer, go to a channel with strong absoprtion such as 60 and select the moments tool. This will present the spectral profiler. Draw an ellipse round the core and see the spectrum. Shift-click in the spectral profile tool to select the channels covering the line. Select the zeroth moment (total intensity). Note the start and stop channels (approximately) and click on Collapse.
