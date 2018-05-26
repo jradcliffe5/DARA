@@ -7,6 +7,8 @@ The EVN continuum tutorial is split into three parts which should be done in ord
 
 * The data can be downloaded from here: [data link](http://www.jive.nl/fitsfiles?experiment=N14C3_141022)
 
+**DARA students, you should have these files on your computers already!**
+
 The webpages to guide you through the tutorials are below:
 
   1. [CASA Basic Calibration](part1/part1_initial_cal.md) - initial calibration of data set with two pairs of phase-ref and target.

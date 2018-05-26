@@ -46,6 +46,7 @@ This section is organised as follows:
 14. [Image the target with phase and amplitude self-calibration applied (step 14)](#im_sc_target_a)
 
 ## <a name="Writing_scripts">1. Writing your own script using the skeleton</a>
+[<< back to top](#top)
 
 * Open `NME_3C345_skeleton_modified.py` (or whatever you have called it) in a text editor.
 
@@ -56,6 +57,7 @@ For each step we are going to figure out the correct inputs for all the tasks in
 To ease you into writing your own scripts, the following section describes an example step:
 
 ## <a name="Example"> 2. Example
+[<< back to top](#top)
 
 * Look at step 1 in the script `NME_3C345_skeleton_modified.py` (or whatever you have called it) using gedit or your favourite text editor.
 
@@ -136,6 +138,7 @@ You can change the plot interactively once it appears, remember to enter any add
 ```
 
 ## <a name="Time_dep_delay">3. Time-dependent delay and phase calibration of phase-ref J1640+3946 (step 2)</a>
+[<< back to top](#top)
 
 Continue as above for steps 2 - make sure you try entering the missing parameters yourself first, or at least identify which you need to set, but use `NME_J1849.py` for guidance if necessary, especially if a syntax error is annoying!
 
@@ -147,6 +150,7 @@ If all goes to plans, below are what the delay and phase solutions should look l
 ![](files/CASA_J1640+3946_3C345_1.png)
 
 ## <a name="apply_so_far">4. Apply calibration so far, image phase ref (step 3)</a>
+[<< back to top](#top)
 
 * Fill in the missing parameters for `applycal` and clean in order to apply the delay and phase corrections to the phase-ref
 * Then image the phase-ref interactively.
@@ -156,6 +160,7 @@ I got a peak of 1.551, rms 0.048, S/N 32 for the image `J1640+3946_phasecal.clea
 Use the viewer to look at the clean image (after each clean below, too)
 
 ## <a name="Flagging">5. Flagging (step 4)</a>
+[<< back to top](#top)
 
 * For Step 4, **you can just run it as given** i.e. `mysteps=[4];execfile('<filename>.py')`. Don't spend a lot of time chasing bad data.
 
@@ -190,6 +195,7 @@ mode='manual' antenna='SH' spw='0,1' timerange='13:00:34~13:00:38'
 
 
 ## <a name="Time_dep_amp_cal">6. Time-dependent amplitude calibration of the phase-ref (step 5)</a>
+[<< back to top](#top)
 
 * Fill in the missing parameters in step 5.
 * Apply the two calibration tables you just made as gaintables in `gaincal`.
@@ -199,6 +205,8 @@ This is what the new amplitude correction table should look like.
 ![](files/CASA_J1640+3946_3C345_4.png)
 
 ## <a name="Apply_all">7. Apply all calibration to the phase-ref and check (step 6)</a>
+[<< back to top](#top)
+
 * Fill in the missing parameters for step 6 to apply these three tables to the phase-ref
 * Plot the corrected amplitudes.
 * Plot the corrected visibility amplitudes against time for the baselines to the refant.
@@ -210,6 +218,8 @@ The plots should look something like this:
 ![](files/CASA_J1640+3946_3C345_6.png)
 
 ## <a name="im_cal_phs_ref">8. Image the calibrated phase-ref (step 7)</a>
+[<< back to top](#top)
+
 Fill in the parameters for clean.
 
 I got
@@ -219,6 +229,7 @@ Peak 1.749, rms 0.002, S/N 889
 for the image J1640+3946_apcal.clean.image
 
 ## <a name="Apply_all_target">9. Apply all calibration to the target (step 9)</a>
+[<< back to top](#top)
 (Note that step 8 is usually skipped as it is not a normal part of data reduction).
 
 * Use the phase-ref as the `gainfield` and apply the three tables you have just made to the target field. In the first `applycal`, use `antenna='!JB'` the since the existing tables cannot be applied to that antenna due to its missing scans.
@@ -246,6 +257,8 @@ You can see what the source looks like at 15 GHz at similar resolution [here]( h
 ![](files/CASA_J1640+3946_3C345_8.png)
 
 ## <a name="sc_target_p">11. Self-calibrate target - phase (step 11)</a>
+[<< back to top](#top)
+
 * Enter parameters in gaincal in step 11 for amplitude self-calibration of phase of 3C345.ms.
 
 Previous experimenting showed that using `minsnr=3` failed many solutions, but since the data look coherent, this is probably due to an inadequate input model, i.e. the previous image model, which had very low S/N. We set `minsnr=1` which is rather dangerous, as it could pass bad solutions, but we do not want to lose good data, and hope that we can use a higher `minsnr` after more iterations of calibration.
@@ -259,6 +272,8 @@ Previous experimenting showed that using `minsnr=3` failed many solutions, but s
 **Note:** If you don't like your calibration table and decide to change a parameter and repeat this step, close the plotcal window (click on upper right x) before re-running this step.
 
 ## <a name="im_sc_target_p">Image phase-self-calibrated target (step 12)</a>
+[<< back to top](#top)
+
 * Enter the parameters in clean to image these data.
 
 In cleaning, be guided by the image above for where to set the mask and maybe expand it during cleaning. I only got a small improvement in S/N;
@@ -272,6 +287,8 @@ You can see that it is good and bright but there are some jumps. Note that the s
 ![](files/CASA_J1640+3946_3C345_10.png)
 
 ## <a name="sc_target_a">Self-calibrate target - amplitude (step 13)</a>
+[<< back to top](#top)
+
 * Enter the parameters in `gaincal` in step 13 to perform amplitude self-calibration, applying the phase calibration table you just made.
 
 You need a bit longer solution interval, but probably shorter than for J1849+3024. Stick with `minsnr=1` for now.
@@ -283,6 +300,8 @@ You need a bit longer solution interval, but probably shorter than for J1849+302
 * Enter the parameters in applycal to apply these two tables.
 
 ## <a name="im_sc_target_a">Image the target with phase and amplitude self-calibration applied (step 14)</a>
+[<< back to top](#top)
+
 * Enter the parameters in clean to make another image of the target 3C345 in step 14.
 * Double the number of iterations and `npercycle` as no that the calibration is better, you can clean deeper (you can increase or decrease interactively during clean, too).
 * Also, increase the imagesize to 360 pixels, to allow better deconvolution of an extended source.
@@ -307,4 +326,4 @@ You can see at least one jet component in the expected direction - great! The uv
 ![](files/CASA_J1640+3946_3C345_13.png)
 ![](files/CASA_J1640+3946_3C345_14.png)
 
-Congratulations this is the end and you have a beautiful AGN to look at. If you get really stuck you have a script called NME_3C345.py.gz within the original tar file which includes all the answers.
+Congratulations this is the end and you have a beautiful AGN to look at. If you get really stuck you have a script called `NME_3C345.py.gz` within the original tar file which includes all the answers.
