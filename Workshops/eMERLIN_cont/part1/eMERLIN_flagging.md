@@ -32,6 +32,7 @@ help(par.mode)                     # help for a particular input (only for some 
 ```
 
 ### <a name="check_data">Check data: listobs and plotants (step 1)</a>
+[<< back to top](#top)
 
 * Check that you have `all_avg.ms` in a directory with enough space and start CASA.
 
@@ -94,3 +95,22 @@ plotants(***)
 ```
 
 ![](files/3C277_002.png)
+
+Consider what would make a good reference antenna. Although Cambridge has the largest diameter, it has no short baselines.
+
+* Plot the uv coverage of the data for the phase-reference source.
+
+See annotated `listobs` output above to identify this. You need to enter several parameters; some have been done for you:
+
+```py
+# in CASA
+plotuv(vis='***',
+       field='***',                # phase-ref
+       maxnpts=10000000,           # to plot all the data
+       symbol='.',                 # a dot which will have a different colour for each spw
+       figfile='')                 # fill this in if you want a png
+```
+
+The u and v coordinates represent (wavelength/projected baseline) as the Earth rotates whilst the source is observed. Thus, as each spw is at a different wavelength, it samples a different part of the uv plane, improving the aperture coverage of the source, allowing Multi-Frequency Synthesis (MFS) of continuum sources.
+
+![](files/3C277_007.png)
