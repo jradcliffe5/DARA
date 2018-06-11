@@ -24,7 +24,8 @@ To start step 2 (Calibration), you will need to download some extra associated s
 If you would like to start directly at step 2 and skip flagging then follow the instructions at the start of the calibration tutorial webpage
 
 3. [Imaging Tutorial](part3/eMERLIN_imaging.md)
-To start step 3 (Imaging), you will need to download the associated scripts (and calibrated data set if calibration went badly or you would like to start directly from step 3 and miss out the other tutorials:
+
+To start step 3 (Imaging), you will need to download the associated scripts (and calibrated data set if calibration went badly or you would like to start directly from step 3 and miss out the other tutorials.
 
 Scripts:
 * [3C277.1_imaging_skeleton.py](http://www.jb.man.ac.uk/~radcliff/DARA/Data_reduction_workshops/3C277_eMERLIN/3C277.1_imaging_skeleton.py)
